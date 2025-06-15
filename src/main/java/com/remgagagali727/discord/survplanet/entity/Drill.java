@@ -2,11 +2,13 @@ package com.remgagagali727.discord.survplanet.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class Drill {
     @Id
     private Long id;
@@ -15,5 +17,5 @@ public class Drill {
     @MapsId
     @JoinColumn(name = "id")
     private Item item;
-    private LocalDateTime next;
+    private String toughness;
 }

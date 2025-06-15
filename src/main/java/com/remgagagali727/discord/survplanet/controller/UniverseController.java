@@ -2,20 +2,22 @@ package com.remgagagali727.discord.survplanet.controller;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.stereotype.Controller;
 
 import java.awt.*;
 
-public class UniverseController extends BasicController{
+@Controller
+public class UniverseController{
 
     private String casinoPlanet = "%nah%";
     private Integer playerCoins;
 
-    public UniverseController(MessageReceivedEvent event) {
-        super(event);
+    public UniverseController() {
+
     }
 
 
-    public void casino(String command) {
+    public void casino(String command, MessageReceivedEvent event) {
         if(command.startsWith("casino ")) command = command.substring(7);
         else if(command.startsWith("cas ")) command = command.substring(4);
         Integer betCoins = 0;
@@ -27,7 +29,7 @@ public class UniverseController extends BasicController{
                 return;
             }
         } catch (Exception e) {
-            invalidCommand();
+            invalidCommand(event);
             return;
         }
         EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -52,7 +54,7 @@ public class UniverseController extends BasicController{
         return 100;
     }
 
-    private void invalidCommand() {
+    private void invalidCommand(MessageReceivedEvent event) {
         event.getChannel().sendMessage("The command is invalid try reading s!help").queue();
     }
 

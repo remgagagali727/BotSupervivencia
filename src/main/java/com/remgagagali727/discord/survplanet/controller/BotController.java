@@ -1,71 +1,57 @@
 package com.remgagagali727.discord.survplanet.controller;
 
-
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
+@Controller
 public class BotController {
+    @Autowired
+    private ProfileController profileController;
+    @Autowired
+    private PlanetController planetController;
+    @Autowired
+    private UniverseController universeController;
 
-    private final MessageReceivedEvent event;
-    private final ProfileController profileController;
-    private final PlanetController planetController;
-    private final UniverseController universeController;
-    private final String command;
-
-    public BotController(MessageReceivedEvent event) {
-        this.event = event;
-        this.profileController = new ProfileController(event);
-        this.universeController = new UniverseController(event);
-        this.planetController = new PlanetController(event);
-        String command;
-        try {
-            command = event.getMessage().getContentRaw().substring(2);
-        } catch (Exception e) {
-            command = "";
-        }
-        this.command = command;
-        if(notValid()) return;
-        doCommand();
-    }
-
-    private void doCommand() {
+    private void doCommand(String command, MessageReceivedEvent event) {
         switch (command) {
             case "profile":
             case "p":
-                profileController.profile();
+                profileController.profile(event);
                 return;
             case "m":
             case "mine":
-                planetController.mine();
+                planetController.mine(event);
                 return;
             case "f":
             case "fish":
-                planetController.fish();
+                planetController.fish(event);
                 return;
             case "hunt":
             case "h":
-                planetController.hunt();
+                planetController.hunt(event);
                 return;
             case "help":
-                help();
+                help(event);
                 return;
             case "cas":
             case "casino":
-                casHelp();
+                casHelp(event);
                 return;
         }
-        if(command.startsWith("cas") || command.startsWith("casino")) universeController.casino(command);
+        if(command.startsWith("cas") || command.startsWith("casino")) universeController.casino(command, event);
     }
 
-    private void casHelp() {
+    private void casHelp(MessageReceivedEvent event) {
         String helpMessage = """
                 In order to use the casino command you need to put an amount of coins just after the command
                 ie.
                 s!casino 100
                 """;
-        help(helpMessage);
+        help(helpMessage, event);
     }
 
-    private void help() {
+    private void help(MessageReceivedEvent event) {
         String helpMessage = """
                 **Use s!(command) to execute a command**
                 Commands available
@@ -82,14 +68,25 @@ public class BotController {
                 casino (number) -> This command lets you bet your coins if you are currently in the planet the casino is on, else this command will show you where the casino is
                 cas (number) -> Same as casino
                 """;
-        help(helpMessage);
+        help(helpMessage, event);
     }
 
-    private void help(String message) {
+    private void help(String message, MessageReceivedEvent event) {
         event.getChannel().sendMessage(message).queue();
     }
 
-    private boolean notValid() {
+    private boolean notValid(MessageReceivedEvent event) {
         return event.getAuthor().isBot() || !event.getMessage().getContentRaw().startsWith("s!");
+    }
+
+    public void handleEvent(MessageReceivedEvent event) {
+        String command;
+        try {
+            command = event.getMessage().getContentRaw().substring(2);
+        } catch (Exception e) {
+            command = "";
+        }
+        if(notValid(event)) return;
+        doCommand(command, event);
     }
 }

@@ -2,20 +2,22 @@ package com.remgagagali727.discord.survplanet.controller;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.stereotype.Controller;
 
 import java.awt.*;
 
-public class PlanetController extends BasicController{
+@Controller
+public class PlanetController{
 
     private final int HUNT = 0;
     private final int MINE = 1;
     private final int FISH = 2;
 
-    public PlanetController(MessageReceivedEvent event) {
-        super(event);
+    public PlanetController() {
+
     }
 
-    public void mine() {
+    public void mine(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
         if(inCooldown()) {
             message.setTitle("Oh no, your drill is currently in cooldown...");
@@ -28,7 +30,7 @@ public class PlanetController extends BasicController{
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
 
-    public void fish() {
+    public void fish(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
         if(inCooldown()) {
             message.setTitle("Oh no, your fishing rod is currently in cooldown...");
@@ -41,7 +43,7 @@ public class PlanetController extends BasicController{
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
 
-    public void hunt() {
+    public void hunt(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
         if(inCooldown()) {
             message.setTitle("Oh no, your weapon is currently in cooldown...");

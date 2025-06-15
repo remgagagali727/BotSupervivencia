@@ -1,6 +1,6 @@
 package com.remgagagali727.discord.survplanet;
 
-import com.remgagagali727.discord.survplanet.listeners.BotListener;
+import com.remgagagali727.discord.survplanet.listener.BotListener;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.boot.SpringApplication;

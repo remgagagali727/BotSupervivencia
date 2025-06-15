@@ -1,4 +1,4 @@
-package com.remgagagali727.discord.survplanet.controllers;
+package com.remgagagali727.discord.survplanet.controller;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

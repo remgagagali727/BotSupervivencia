@@ -1,4 +1,4 @@
-package com.remgagagali727.discord.survplanet.controllers;
+package com.remgagagali727.discord.survplanet.controller;
 
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -70,14 +70,14 @@ public class BotController {
                 **Use s!(command) to execute a command**
                 Commands available
                 
-                profile -> This command lets you know your profile information 
+                profile -> This command lets you know your profile information
                 p -> Same as profile
                 mine -> This commands lets you mine in the planet you are currently on
                 m -> Same as mine
                 fish -> This commands lets you fish in the planet you are currently on
                 f -> Same as fish
                 hunt -> This commands lets you hunt in the planet you are currently on
-                h -> Same as hunt 
+                h -> Same as hunt
                 help -> This command shows this menu
                 casino (number) -> This command lets you bet your coins if you are currently in the planet the casino is on, else this command will show you where the casino is
                 cas (number) -> Same as casino

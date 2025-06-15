@@ -8,11 +8,13 @@ public class BotController {
     private final MessageReceivedEvent event;
     private final ProfileController profileController;
     private final PlanetController planetController;
+    private final UniverseController universeController;
     private final String command;
 
     public BotController(MessageReceivedEvent event) {
         this.event = event;
         this.profileController = new ProfileController(event);
+        this.universeController = new UniverseController(event);
         this.planetController = new PlanetController(event);
         String command;
         try {
@@ -30,19 +32,44 @@ public class BotController {
             case "profile":
             case "p":
                 profileController.profile();
-                break;
+                return;
             case "m":
             case "mine":
                 planetController.mine();
-                break;
+                return;
             case "f":
             case "fish":
                 planetController.fish();
-                break;
+                return;
             case "hunt":
+            case "h":
                 planetController.hunt();
-                break;
+                return;
+            case "help":
+                help();
+                return;
         }
+        if(command.startsWith("cas") || command.startsWith("casino")) universeController.casino(command);
+    }
+
+    private void help() {
+        String helpMessage = """
+                **Use s!(command) to execute a command**
+                Commands available
+                
+                profile -> This command lets you know your profile information 
+                p -> Same as profile
+                mine -> This commands lets you mine in the planet you are currently on
+                m -> Same as mine
+                fish -> This commands lets you fish in the planet you are currently on
+                f -> Same as fish
+                hunt -> This commands lets you hunt in the planet you are currently on
+                h -> Same as hunt 
+                help -> This command shows this menu
+                casino (number) -> This command lets you bet your coins if you are currently in the planet the casino is on, else this command will show you where the casino is
+                cas (number) -> Same as casino
+                """;
+        event.getChannel().sendMessage(helpMessage).queue();
     }
 
     private boolean notValid() {

@@ -3,15 +3,14 @@ package com.remgagagali727.discord.survplanet.controllers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class PlanetController {
+public class PlanetController extends BasicController{
 
-    private final MessageReceivedEvent event;
     private final int HUNT = 0;
     private final int MINE = 1;
     private final int FISH = 2;
 
     public PlanetController(MessageReceivedEvent event) {
-        this.event = event;
+        super(event);
     }
 
     public void mine() {

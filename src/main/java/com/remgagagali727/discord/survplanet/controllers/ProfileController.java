@@ -3,12 +3,10 @@ package com.remgagagali727.discord.survplanet.controllers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class ProfileController {
-
-    public final MessageReceivedEvent event;
+public class ProfileController extends BasicController{
 
     public ProfileController(MessageReceivedEvent event) {
-        this.event = event;
+        super(event);
     }
 
     public void profile() {

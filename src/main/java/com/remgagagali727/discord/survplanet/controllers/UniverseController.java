@@ -8,7 +8,7 @@ import java.awt.*;
 public class UniverseController extends BasicController{
 
     private String casinoPlanet = "%nah%";
-    private Integer playerCoins = 100;
+    private Integer playerCoins;
 
     public UniverseController(MessageReceivedEvent event) {
         super(event);
@@ -23,6 +23,7 @@ public class UniverseController extends BasicController{
         if(command.startsWith("casino ")) command = command.substring(7);
         else if(command.startsWith("cas ")) command = command.substring(4);
         Integer betCoins = 0;
+        playerCoins = getPlayerCoins();
         try {
             betCoins = Integer.valueOf(command);
             if(betCoins > playerCoins || betCoins < 0) {
@@ -49,6 +50,10 @@ public class UniverseController extends BasicController{
             }
         }
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    private Integer getPlayerCoins() {
+        return 100;
     }
 
     private void invalidCommand() {

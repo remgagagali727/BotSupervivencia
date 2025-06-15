@@ -1,19 +1,33 @@
 package com.remgagagali727.discord.survplanet.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Entity
 @Getter
 public class Player {
-    private String id;
+    @Id
+    private Long id;
     private String coins;
-    private Drill e_drill;
-    private Rod e_rod;
-    private Weapon e_weapon;
+    @ManyToOne
+    @JoinColumn(name = "e_drill")
+    private Drill drill;
+    @ManyToOne
+    @JoinColumn(name = "e_rod")
+    private Rod rod;
+    @ManyToOne
+    @JoinColumn(name = "e_weapon")
+    private Weapon weapon;
+    @ManyToOne
+    @JoinColumn(name = "e_spaceship")
+    private Spaceship spaceship;
     private LocalDateTime n_fish;
     private LocalDateTime n_mine;
     private LocalDateTime n_hunt;
-    private Spaceship e_spaceship;
     private String health;
 }

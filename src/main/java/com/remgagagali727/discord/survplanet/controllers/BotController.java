@@ -48,8 +48,21 @@ public class BotController {
             case "help":
                 help();
                 return;
+            case "cas":
+            case "casino":
+                casHelp();
+                return;
         }
         if(command.startsWith("cas") || command.startsWith("casino")) universeController.casino(command);
+    }
+
+    private void casHelp() {
+        String helpMessage = """
+                In order to use the casino command you need to put an amount of coins just after the command
+                ie.
+                s!casino 100
+                """;
+        help(helpMessage);
     }
 
     private void help() {
@@ -69,7 +82,11 @@ public class BotController {
                 casino (number) -> This command lets you bet your coins if you are currently in the planet the casino is on, else this command will show you where the casino is
                 cas (number) -> Same as casino
                 """;
-        event.getChannel().sendMessage(helpMessage).queue();
+        help(helpMessage);
+    }
+
+    private void help(String message) {
+        event.getChannel().sendMessage(message).queue();
     }
 
     private boolean notValid() {

@@ -16,10 +16,6 @@ public class UniverseController extends BasicController{
 
 
     public void casino(String command) {
-        if(command.equals("casino") || command.equals("cas")) {
-            invalidCommand();
-            return;
-        }
         if(command.startsWith("casino ")) command = command.substring(7);
         else if(command.startsWith("cas ")) command = command.substring(4);
         Integer betCoins = 0;

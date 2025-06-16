@@ -1,13 +1,19 @@
 package com.remgagagali727.discord.survplanet.controller;
 
-import com.remgagagali727.discord.survplanet.entity.Planet;
+import com.remgagagali727.discord.survplanet.entity.*;
+import com.remgagagali727.discord.survplanet.repository.ItemRelationRepository;
+import com.remgagagali727.discord.survplanet.repository.LootRepository;
 import com.remgagagali727.discord.survplanet.repository.PlanetRepository;
+import com.remgagagali727.discord.survplanet.repository.TypeRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.awt.*;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.List;
 
 @Controller
@@ -16,21 +22,83 @@ public class PlanetController{
     @Autowired
     private PlanetRepository planetRepository;
 
-    private static final int HUNT = 0;
-    private static final int MINE = 1;
-    private static final int FISH = 2;
+    @Autowired
+    private LootRepository lootRepository;
+
+    @Autowired
+    private TypeRepository typeRepository;
+
+    @Autowired
+    private PlayerController playerController;
+
+    @Autowired
+    private ItemRelationRepository itemre;
+
+    private static final long HUNT = 0;
+    private static final long FISH = 1;
+    private static final long MINE = 2;
 
     public void mine(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
-        if(inCooldown()) {
+        Player player = playerController.getPlayer(event.getAuthor().getIdLong());
+        if(!player.isOnPlanet()) {
+            message.setTitle("You are not in a planet, wait until you get to one in order to mine :D");
+            message.setColor(Color.BLACK);
+        } else if(minCooldown(player)) {
             message.setTitle("Oh no, your drill is currently in cooldown...");
-            message.addField("Cooldown", "you can mine at %time% try later :p", false);
+            message.addField("Cooldown", "you can mine at " + player.getN_mine() + " try later :p", false);
         } else {
+            Planet planet = player.getPlanet();
+            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getDrill().getToughness()));
+            int got = (int)(Math.random() * 3 + 1);
+            BigInteger bgot = new BigInteger(String.valueOf(got));
+            if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
+                event.getChannel().sendMessage("You would need " + extraMinutes + " minutes to mine here but thats to much, you can't mine here").queue();
+                return;
+            }
+            BigInteger damage = bgot.multiply(extraMinutes);
+            if(damage.compareTo(new BigInteger(player.getHealth())) > 0) {
+                event.getChannel().sendMessage("You would get killed if you mined here, thank the god of this planet for saving you").queue();
+                return;
+            }
+            BigInteger health = new BigInteger(player.getHealth());
+            health = health.add(damage.negate());
+            player.setHealth(health.toString());
+            BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getDrill().getToughness()));
+            LocalDateTime newMine = LocalDateTime.now().plusMinutes(extraMinutes.intValueExact());
+            List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(MINE));
+            StringBuilder msg = new StringBuilder("**You got**\n");
+            msg.append(extraCoins).append(" coins!!!\n");
+            for(Loot loot : loots) {
+                got = (int)(Math.random() * 3 + 1);
+                Item item = loot.getItem();
+                Optional<ItemRelation> itemRelationOptional = itemre.findByPlayerAndItem(player, item);
+                ItemRelation nir = new ItemRelation();
+                if(itemRelationOptional.isEmpty()) {
+                    nir.setItem(item);
+                    nir.setPlayer(player);
+                    nir.setAmount(String.valueOf(got));
+                } else {
+                    nir = itemRelationOptional.get();
+                    nir.setAmount(new BigInteger(nir.getAmount()).add(new BigInteger(String.valueOf(got))).toString());
+                }
+                itemre.save(nir);
+                msg.append(got).append(" ").append(item.getName()).append('\n');
+            }
+            msg.append("And you lost ").append(damage).append(" hearts");
+            player.setN_mine(newMine);
+            player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
+            playerController.savePlayer(player);
             message.setColor(Color.YELLOW);
-            message.setAuthor(event.getAuthor().getEffectiveName() + " is mining at planet " + "%planet%");
+            message.setAuthor(event.getAuthor().getEffectiveName() + " is mining at planet " + player.getPlanet().getName());
             message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWttOTZ6dHNhZjQycXI3ZzR5ZzBndDV5bWdiZW1rZXJjNGNvYng3aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KbCaO3y2yH5qo/giphy.gif");
+            event.getChannel().sendMessage(msg.toString()).queue();
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
+    }
+
+    private boolean minCooldown(Player player) {
+        return player.getN_mine().isAfter(LocalDateTime.now());
     }
 
     public void fish(MessageReceivedEvent event) {
@@ -86,9 +154,10 @@ public class PlanetController{
         List<Planet> planets = planetRepository.findAll();
         page = Long.min(page - 1, (planets.size() - 1) / 10);
         StringBuilder mes = new StringBuilder("**Planets**\n");
+        planets.sort(Comparator.comparing(p -> new BigInteger(p.getToughness())));
         for(int i = (int) page * 10;i < Long.min((page + 1) * 10, planets.size());i++) {
             Planet item = planets.get(i);
-            String items = "(" + item.getId() + ") " + item.getName() + "\n";
+            String items = "(" + item.getId() + ") " + item.getName() + " " + item.getToughness() + "\n";
             mes.append(items);
         }
         mes.append("Page ").append(page + 1);

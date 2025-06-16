@@ -37,8 +37,9 @@ public class Player {
     @JoinColumn(name = "id_planet")
     private Planet planet;
     private LocalDateTime arrive;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<Item> inventory;
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ItemRelation> inventory;
+
 
     public Player(Long id) {
         this.id = id;

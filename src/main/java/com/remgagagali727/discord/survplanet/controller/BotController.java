@@ -14,6 +14,8 @@ public class BotController {
     private UniverseController universeController;
     @Autowired
     private PlayerController playerController;
+    @Autowired
+    private FoodController foodController;
 
     private void doCommand(String command, MessageReceivedEvent event) {
         switch (command) {
@@ -50,12 +52,29 @@ public class BotController {
             case "planets":
                 planetController.planets("planets 1", event);
                 return;
+            case "eat":
+                foodController.eat("", event);
+                return;
+            case "getfood":
+                foodController.getFood("", event);
+                return;
         }
-        if(command.startsWith("alex ") && event.getChannel().getId().equals("1383991269654794341")) planetController.addPlanet(command.substring(5), event);
-        if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
-        if(command.startsWith("go ")) universeController.go(command, event);
-        if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.invetory(command, event);
-        if(command.startsWith("planets ") || command.startsWith("inventory ")) planetController.planets(command, event);
+
+        // También agregar esto a la lista de comandos con prefijo
+        if (command.startsWith("alex ") && event.getChannel().getId().equals("1383991269654794341"))
+            planetController.addPlanet(command.substring(5), event);
+        if (command.startsWith("cas ") || command.startsWith("casino "))
+            universeController.casino(command, event);
+        if (command.startsWith("go "))
+            universeController.go(command, event);
+        if (command.startsWith("i ") || command.startsWith("inventory "))
+            playerController.invetory(command, event);
+        if (command.startsWith("planets "))
+            planetController.planets(command, event);
+        if (command.startsWith("eat "))
+            foodController.eat(command, event);
+        if (command.startsWith("getfood "))
+            foodController.getFood(command, event);
     }
 
     private void goHelp(MessageReceivedEvent event) {
@@ -81,7 +100,7 @@ public class BotController {
         String helpMessage = """
                 **Use s!(command) to execute a command**
                 Commands available
-                
+
                 profile -> This command lets you know your profile information
                 p -> Same as profile
                 mine -> This commands lets you mine in the planet you are currently on
@@ -96,6 +115,8 @@ public class BotController {
                 go (planet) -> This command allows you to get to another planet if and only if you are in a planet that is no that planet
                 i (page) -> This command allows you to see you inventory
                 inventory (page) -> Same as i
+                eat (food) -> This command allows you to consume food items to restore health
+                getfood [name] [quantity] -> Get food to test the eating system
                 """;
         help(helpMessage, event);
     }
@@ -115,7 +136,8 @@ public class BotController {
         } catch (Exception e) {
             command = "";
         }
-        if(notValid(event)) return;
+        if (notValid(event))
+            return;
         doCommand(command, event);
     }
 }

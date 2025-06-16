@@ -21,7 +21,10 @@ public class ProfileController{
                 .addField("Equipped Drill", player.getDrill().getItem().getName().toUpperCase(), true)
                 .addField("Equipped Rod", player.getRod().getItem().getName().toUpperCase(), true)
                 .addField("Equipped Weapon", player.getWeapon().getItem().getName().toUpperCase(), true)
-                .addField("Equipped Spaceship", player.getSpaceship().getItem().getName().toUpperCase(), true);
+                .addField("Equipped Spaceship", player.getSpaceship().getItem().getName().toUpperCase(), true)
+                .addField("Inventory", "You have " + player.getInventory().size() + " items in your inventory.", true)
+                .addField("Health", String.valueOf(player.getHealth()), true)
+                .addField("food", String.valueOf(player.getInventory()), true);
 
         if(player.isOnPlanet()) {
             eBuilder.addField("Location", player.getPlanet().getName().toUpperCase(), true);

@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: survbot-db
+    environment:
+      POSTGRES_DB: survbot
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres:5432
+      DB_USER: dbuser
+      DB_PASSWORD: dbpassword
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

@@ -35,16 +35,16 @@ public class PlayerController {
                     Player newPlayer = new Player(idLong);
                     newPlayer.setCoins("0");
                     newPlayer.setHealth("100");
-                    newPlayer.setDrill(drillRepository.getReferenceById(0L));
-                    newPlayer.setRod(rodRepository.getReferenceById(1L));
-                    newPlayer.setWeapon(weaponRepository.getReferenceById(2L));
-                    newPlayer.setSpaceship(spaceshipRepository.getReferenceById(3L));
+                    newPlayer.setDrill(drillRepository.getReferenceById(1L));
+                    newPlayer.setRod(rodRepository.getReferenceById(2L));
+                    newPlayer.setWeapon(weaponRepository.getReferenceById(3L));
+                    newPlayer.setSpaceship(spaceshipRepository.getReferenceById(4L));
                     newPlayer.setN_fish(LocalDateTime.now());
                     newPlayer.setN_mine(LocalDateTime.now());
                     newPlayer.setN_hunt(LocalDateTime.now());
                     newPlayer.setArrive(LocalDateTime.now());
                     newPlayer.setPlanet(planetRepository.getReferenceById(2L));
-                    newPlayer.setInventory(List.of(itemRepository.getReferenceById(0L),
+                    newPlayer.setInventory(List.of(itemRepository.getReferenceById(4L),
                             itemRepository.getReferenceById(1L),
                             itemRepository.getReferenceById(2L),
                             itemRepository.getReferenceById(3L)));

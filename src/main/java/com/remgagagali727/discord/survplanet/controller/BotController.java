@@ -16,6 +16,8 @@ public class BotController {
     private PlayerController playerController;
     @Autowired
     private FoodController foodController;
+    @Autowired
+    private ItemController itemController;
 
     private void doCommand(String command, MessageReceivedEvent event) {
         switch (command) {
@@ -52,6 +54,9 @@ public class BotController {
             case "planets":
                 planetController.planets("planets 1", event);
                 return;
+            case "items":
+                itemController.items("1", event);
+                return;
             case "eat":
                 foodController.eat("", event);
                 return;
@@ -59,6 +64,19 @@ public class BotController {
                 foodController.getFood("", event);
                 return;
         }
+        if(event.getChannel().getId().equals("1383991269654794341")) {
+            if(command.startsWith("alex ")) planetController.addPlanet(command.substring(5), event);
+            if(command.startsWith("item ")) itemController.addItem(command.substring(5), event);
+            if(command.startsWith("drill ")) itemController.addDrill(command.substring(6), event);
+            if(command.startsWith("rod ")) itemController.addRod(command.substring(4), event);
+            if(command.startsWith("wea ")) itemController.addWeapon(command.substring(4), event);
+            if(command.startsWith("spa ")) itemController.addSpaceship(command.substring(4), event);
+        }
+        if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
+        if(command.startsWith("items ")) itemController.items(command.substring(6), event);
+        if(command.startsWith("go ")) universeController.go(command, event);
+        if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.invetory(command, event);
+        if(command.startsWith("planets ") || command.startsWith("inventory ")) planetController.planets(command, event);
 
         // También agregar esto a la lista de comandos con prefijo
         if (command.startsWith("alex ") && event.getChannel().getId().equals("1383991269654794341"))
@@ -100,7 +118,7 @@ public class BotController {
         String helpMessage = """
                 **Use s!(command) to execute a command**
                 Commands available
-
+                
                 profile -> This command lets you know your profile information
                 p -> Same as profile
                 mine -> This commands lets you mine in the planet you are currently on

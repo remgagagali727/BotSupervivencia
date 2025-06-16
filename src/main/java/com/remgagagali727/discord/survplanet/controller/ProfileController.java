@@ -31,6 +31,9 @@ public class ProfileController{
         } else {
             eBuilder.addField("Location", "in Space", true);
         }
+
+        eBuilder.addField("Health", player.getHealth() + " ❤", true);
+
         event.getChannel().sendMessageEmbeds(eBuilder.build()).queue();
     }
 }

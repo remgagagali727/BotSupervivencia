@@ -1,12 +1,10 @@
 package com.remgagagali727.discord.survplanet.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.time.LocalDateTime;
 
@@ -34,8 +32,20 @@ public class Player {
     private LocalDateTime n_mine;
     private LocalDateTime n_hunt;
     private String health;
+    @ManyToOne
+    @JoinColumn(name = "id_planet")
+    private Planet planet;
+    private LocalDateTime arrive;
 
     public Player(Long id) {
         this.id = id;
+    }
+
+    public boolean isOnPlanet() {
+        return !arrive.isAfter(LocalDateTime.now());
+    }
+
+    public void notInPlanet(MessageReceivedEvent event) {
+        event.getChannel().sendMessage("You will arrive to the planet " + planet.getName() + " at " + arrive).queue();
     }
 }

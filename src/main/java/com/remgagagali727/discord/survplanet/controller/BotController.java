@@ -38,8 +38,22 @@ public class BotController {
             case "casino":
                 casHelp(event);
                 return;
+            case "go":
+                goHelp(event);
+                return;
         }
         if(command.startsWith("cas") || command.startsWith("casino")) universeController.casino(command, event);
+        else if(command.startsWith("go")) universeController.go(command, event);
+    }
+
+    private void goHelp(MessageReceivedEvent event) {
+        String helpMessage = """
+                In order to use the go you need to put the planet id or the planet name
+                ie.
+                s!go 1
+                s!go earth
+                """;
+        help(helpMessage, event);
     }
 
     private void casHelp(MessageReceivedEvent event) {

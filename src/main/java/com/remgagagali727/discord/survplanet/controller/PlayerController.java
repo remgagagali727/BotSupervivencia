@@ -22,6 +22,8 @@ public class PlayerController {
     private WeaponRepository weaponRepository;
     @Autowired
     private SpaceshipRepository spaceshipRepository;
+    @Autowired
+    private PlanetRepository planetRepository;
 
     public Player getPlayer(long idLong) {
         Optional<Player> optionalPlayer = playerRepository.findById(idLong);
@@ -36,7 +38,13 @@ public class PlayerController {
                     newPlayer.setN_fish(LocalDateTime.now());
                     newPlayer.setN_mine(LocalDateTime.now());
                     newPlayer.setN_hunt(LocalDateTime.now());
+                    newPlayer.setArrive(LocalDateTime.now());
+                    newPlayer.setPlanet(planetRepository.getReferenceById(0L));
                     return playerRepository.save(newPlayer);
                 });
+    }
+
+    public void savePlayer(Player player) {
+        playerRepository.save(player);
     }
 }

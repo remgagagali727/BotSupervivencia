@@ -40,3 +40,4 @@ docker-compose.yml
 ### Data scripts ###
 /src/main/resources/db/food_data.sql
 /src/main/resources/db/test_data/
+/src/main/java/com.remgagagali727/botsupervivencia/config/SimpleInitializer.java

@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### docker ###
+# Ignore Dockerfile and docker-compose files
+Dockerfile
+docker-compose.yml
+
+### Data scripts ###
+/src/main/resources/db/food_data.sql
+/src/main/resources/db/test_data/

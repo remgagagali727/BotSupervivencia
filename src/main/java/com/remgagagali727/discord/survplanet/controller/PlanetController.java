@@ -1,13 +1,20 @@
 package com.remgagagali727.discord.survplanet.controller;
 
+import com.remgagagali727.discord.survplanet.entity.Planet;
+import com.remgagagali727.discord.survplanet.repository.PlanetRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.awt.*;
+import java.util.List;
 
 @Controller
 public class PlanetController{
+
+    @Autowired
+    private PlanetRepository planetRepository;
 
     private static final int HUNT = 0;
     private static final int MINE = 1;
@@ -54,5 +61,37 @@ public class PlanetController{
 
     private boolean inCooldown() {
         return Math.random() * 2 < 1;
+    }
+
+    public void addPlanet(String command, MessageReceivedEvent event) {
+        String[] s = command.split(" ");
+        Planet planet = new Planet();
+        planet.setName(s[0]);
+        planet.setX(s[1]);
+        planet.setY(s[2]);
+        planet.setToughness(s[3]);
+        planetRepository.save(planet);
+        event.getChannel().sendMessage("Si se puedo xd").queue();
+    }
+
+    public void planets(String command, MessageReceivedEvent event) {
+        if(command.startsWith("planets ")) command = command.substring(8);
+        long page;
+        try {
+            page = Long.parseLong(command);
+        } catch (Exception ignored) {
+            UniverseController.invalidCommand(event);
+            return;
+        }
+        List<Planet> planets = planetRepository.findAll();
+        page = Long.min(page - 1, (planets.size() - 1) / 10);
+        StringBuilder mes = new StringBuilder("**Planets**\n");
+        for(int i = (int) page * 10;i < Long.min((page + 1) * 10, planets.size());i++) {
+            Planet item = planets.get(i);
+            String items = "(" + item.getId() + ") " + item.getName() + "\n";
+            mes.append(items);
+        }
+        mes.append("Page ").append(page + 1);
+        event.getChannel().sendMessage(mes.toString()).queue();
     }
 }

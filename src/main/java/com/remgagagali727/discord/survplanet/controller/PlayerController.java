@@ -43,7 +43,7 @@ public class PlayerController {
                     newPlayer.setN_mine(LocalDateTime.now());
                     newPlayer.setN_hunt(LocalDateTime.now());
                     newPlayer.setArrive(LocalDateTime.now());
-                    newPlayer.setPlanet(planetRepository.getReferenceById(0L));
+                    newPlayer.setPlanet(planetRepository.getReferenceById(2L));
                     newPlayer.setInventory(List.of(itemRepository.getReferenceById(0L),
                             itemRepository.getReferenceById(1L),
                             itemRepository.getReferenceById(2L),

@@ -7,15 +7,13 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Entity
 @NoArgsConstructor
-public class Item {
+@Entity
+@Getter
+public class Effect {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String description;
-    private String buy_price;
-    private String sell_price;
+    private String speed;
+    private String toughness_reduction;
 }

@@ -47,10 +47,15 @@ public class BotController {
             case "inventory":
                 playerController.invetory("i 1", event);
                 return;
+            case "planets":
+                planetController.planets("planets 1", event);
+                return;
         }
+        if(command.startsWith("alex ") && event.getChannel().getId().equals("1383991269654794341")) planetController.addPlanet(command.substring(5), event);
         if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
         if(command.startsWith("go ")) universeController.go(command, event);
         if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.invetory(command, event);
+        if(command.startsWith("planets ") || command.startsWith("inventory ")) planetController.planets(command, event);
     }
 
     private void goHelp(MessageReceivedEvent event) {

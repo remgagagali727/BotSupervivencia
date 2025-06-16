@@ -9,13 +9,9 @@ import java.awt.*;
 @Controller
 public class PlanetController{
 
-    private final int HUNT = 0;
-    private final int MINE = 1;
-    private final int FISH = 2;
-
-    public PlanetController() {
-
-    }
+    private static final int HUNT = 0;
+    private static final int MINE = 1;
+    private static final int FISH = 2;
 
     public void mine(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();

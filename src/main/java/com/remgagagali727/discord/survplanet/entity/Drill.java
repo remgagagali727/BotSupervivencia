@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Drill {
+public class Drill{
     @Id
     private Long id;
 

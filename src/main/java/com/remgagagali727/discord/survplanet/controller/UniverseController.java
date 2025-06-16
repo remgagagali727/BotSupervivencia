@@ -113,7 +113,7 @@ public class UniverseController{
         event.getChannel().sendMessage("In exactly " + (long)mtime + " minutes").queue();
     }
 
-    private void invalidCommand(MessageReceivedEvent event) {
+    public static void invalidCommand(MessageReceivedEvent event) {
         event.getChannel().sendMessage("The command is invalid try reading s!help").queue();
     }
 

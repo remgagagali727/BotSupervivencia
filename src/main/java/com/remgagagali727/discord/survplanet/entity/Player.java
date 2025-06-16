@@ -7,6 +7,7 @@ import lombok.Setter;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,6 +37,8 @@ public class Player {
     @JoinColumn(name = "id_planet")
     private Planet planet;
     private LocalDateTime arrive;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Item> inventory;
 
     public Player(Long id) {
         this.id = id;

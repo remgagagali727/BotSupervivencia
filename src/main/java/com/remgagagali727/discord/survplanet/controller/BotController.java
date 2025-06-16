@@ -12,6 +12,8 @@ public class BotController {
     private PlanetController planetController;
     @Autowired
     private UniverseController universeController;
+    @Autowired
+    private PlayerController playerController;
 
     private void doCommand(String command, MessageReceivedEvent event) {
         switch (command) {
@@ -41,9 +43,14 @@ public class BotController {
             case "go":
                 goHelp(event);
                 return;
+            case "i":
+            case "inventory":
+                playerController.invetory("i 1", event);
+                return;
         }
-        if(command.startsWith("cas") || command.startsWith("casino")) universeController.casino(command, event);
-        else if(command.startsWith("go")) universeController.go(command, event);
+        if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
+        if(command.startsWith("go ")) universeController.go(command, event);
+        if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.invetory(command, event);
     }
 
     private void goHelp(MessageReceivedEvent event) {
@@ -81,6 +88,9 @@ public class BotController {
                 help -> This command shows this menu
                 casino (number) -> This command lets you bet your coins if you are currently in the planet the casino is on, else this command will show you where the casino is
                 cas (number) -> Same as casino
+                go (planet) -> This command allows you to get to another planet if and only if you are in a planet that is no that planet
+                i (page) -> This command allows you to see you inventory
+                inventory (page) -> Same as i
                 """;
         help(helpMessage, event);
     }

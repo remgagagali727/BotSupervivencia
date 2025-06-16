@@ -21,6 +21,8 @@ public class Planet{
     private String y;
     @OneToMany
     private List<Player> players;
+    @OneToMany
+    private List<Loot> loots;
 
     @Override
     public boolean equals(Object obj) {

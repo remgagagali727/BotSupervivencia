@@ -60,6 +60,8 @@ public class BotController {
             case "eat":
                 foodController.eat("", event);
                 return;
+
+            // esto esta en desarrollo entonces borrenlo cuando ya no lo usaen , es para obtener items rapido de comida y probarlos
             case "getfood":
                 foodController.getFood("", event);
                 return;

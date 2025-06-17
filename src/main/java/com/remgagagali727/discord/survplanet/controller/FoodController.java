@@ -10,11 +10,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.awt.*;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class FoodController {
@@ -30,6 +32,9 @@ public class FoodController {
 
     @Autowired
     private PlayerController playerController;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public void eat(String command, MessageReceivedEvent event) {
         if (command.startsWith("eat "))
@@ -72,7 +77,6 @@ public class FoodController {
 
         Food food = optFood.get();
 
-        
         int currentHealth = Integer.parseInt(player.getHealth());
         int maxHealth = 100;
         int healthToAdd = Integer.parseInt(food.getHealth_added());
@@ -117,89 +121,124 @@ public class FoodController {
     }
 
     public void getFood(String command, MessageReceivedEvent event) {
-        Long userId = event.getAuthor().getIdLong();
-        Player player = playerController.getPlayer(userId);
-
-        // Obtener el nombre del alimento (default: Space Apple)
-        String foodName = "Space Apple";
-        int quantity = 1;
-
-        if (command.startsWith("getfood ")) {
-            String input = command.substring(8).trim();
-            StringBuilder nameBuilder = new StringBuilder();
-            String quantityStr = "";
-
-            boolean foundNumber = false;
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
-
-                if (Character.isDigit(c) && (i == 0 || input.charAt(i - 1) == ' ')) {
-                    foundNumber = true;
-                    quantityStr = input.substring(i);
-                    break;
-                }
-
-                if (!foundNumber) {
-                    nameBuilder.append(c);
-                }
+        try {
+            // Mensaje de depuración inmediato para confirmar que el método se está ejecutando
+            event.getChannel().sendMessage("🍽️ Procesando solicitud de comida...").queue();
+            
+            // Verificar si tabla food existe
+            boolean foodTableExists = false;
+            try {
+                List<Map<String, Object>> tables = jdbcTemplate.queryForList(
+                        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'food'");
+                foodTableExists = !tables.isEmpty();
+            } catch (Exception e) {
+                System.err.println("Error verificando tabla food: " + e.getMessage());
             }
 
-            // Procesar el nombre del alimento
-            if (nameBuilder.length() > 0) {
-                foodName = nameBuilder.toString().trim();
+            if (!foodTableExists) {
+                event.getChannel().sendMessage(
+                        "¡Sistema de comida no inicializado! Por favor, espera a que el administrador lo configure.")
+                        .queue();
+                return;
             }
 
-            // Procesar la cantidad
-            if (foundNumber) {
+            // Obtener jugador
+            Long userId = event.getAuthor().getIdLong();
+            Player player = playerController.getPlayer(userId);
+            
+            // Configurar valores predeterminados
+            String foodName = "Space Apple";
+            int quantity = 1;
+            
+            // Procesar el comando para extraer nombre y cantidad
+            if (command.startsWith("getfood ")) {
+                String[] parts = command.substring(8).trim().split(" ");
+                StringBuilder nameBuilder = new StringBuilder();
+                
+                // Extraer el último elemento como posible cantidad
+                String lastPart = parts[parts.length - 1];
+                boolean lastPartIsNumber = false;
+                
                 try {
-                    quantity = Integer.parseInt(quantityStr.trim());
+                    quantity = Integer.parseInt(lastPart);
+                    lastPartIsNumber = true;
+                    
+                    // Limitar la cantidad entre 1 y 5
                     if (quantity < 1 || quantity > 5) {
                         quantity = 1;
                     }
                 } catch (NumberFormatException e) {
-                    // aqui nada
+                    // El último elemento no es un número, es parte del nombre
+                }
+                
+                // Construir el nombre
+                for (int i = 0; i < (lastPartIsNumber ? parts.length - 1 : parts.length); i++) {
+                    nameBuilder.append(parts[i]).append(" ");
+                }
+                
+                String extractedName = nameBuilder.toString().trim();
+                if (!extractedName.isEmpty()) {
+                    foodName = extractedName;
                 }
             }
-        }
-
-        List<Food> foods = foodRepository.findAll();
-        Food selectedFood = null;
-        Item foodItem = null;
-
-        for (Food food : foods) {
-            if (food.getItem().getName().toLowerCase().contains(foodName.toLowerCase())) {
-                selectedFood = food;
-                foodItem = food.getItem();
-                break;
+            
+            // Imprimir mensaje de lo que estamos buscando
+            event.getChannel().sendMessage("Buscando: " + foodName + " (Cantidad: " + quantity + ")").queue();
+            
+            // Buscar alimento en la base de datos
+            List<Map<String, Object>> foods = jdbcTemplate.queryForList(
+                    "SELECT i.id, i.name, f.health_added FROM item i " +
+                    "JOIN food f ON i.id = f.id " +
+                    "WHERE LOWER(i.name) LIKE ?", 
+                    "%" + foodName.toLowerCase() + "%");
+            
+            if (foods.isEmpty()) {
+                event.getChannel().sendMessage("No se encontró ningún alimento llamado \"" + foodName + 
+                        "\". Prueba con: Space Apple, Cosmic Bread, Alien Steak, Nebula Soup, Mars Chocolate").queue();
+                return;
             }
+            
+            // Tomar el primer alimento encontrado
+            Map<String, Object> foodData = foods.get(0);
+            Long itemId = ((Number) foodData.get("id")).longValue();
+            String itemName = (String) foodData.get("name");
+            String healthAdded = (String) foodData.get("health_added");
+            
+            // Obtener el item completo
+            Optional<Item> optionalItem = itemRepository.findById(itemId);
+            if (optionalItem.isEmpty()) {
+                event.getChannel().sendMessage("Error interno: No se pudo obtener el item con ID " + itemId).queue();
+                return;
+            }
+            
+            Item foodItem = optionalItem.get();
+            
+            // Agregar el alimento al inventario
+            for (int i = 0; i < quantity; i++) {
+                player.getInventory().add(foodItem);
+            }
+            
+            // Guardar el jugador
+            playerController.savePlayer(player);
+            
+            // Mensaje de confirmación con embed
+            EmbedBuilder embedBuilder = new EmbedBuilder()
+                    .setColor(Color.GREEN)
+                    .setTitle("🎁 ¡Alimento obtenido!")
+                    .setDescription("Has recibido " + quantity + " " + itemName)
+                    .addField("Restaura", "+" + healthAdded + " HP", true)
+                    .addField("Usa", "s!eat " + itemName + " para consumirlo", true)
+                    .setFooter("Space Survival Bot", null);
+            
+            event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+            
+        } catch (Exception e) {
+            System.err.println("Error en getFood: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Asegurar que siempre se envíe un mensaje al chat incluso si hay error
+            event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
         }
-
-        if (foodItem == null) {
-            event.getChannel()
-                    .sendMessage("¡No se encontró el alimento: " + foodName
-                            + "! Prueba con: Space Apple, Cosmic Bread, Alien Steak, Nebula Soup, Mars Chocolate")
-                    .queue();
-            return;
-        }
-
-        // Agregar el alimento al inventario del jugador
-        for (int i = 0; i < quantity; i++) {
-            player.getInventory().add(foodItem);
-        }
-
-        // Guardar el jugador
-        playerController.savePlayer(player);
-
-        // Confirmar al usuario
-        EmbedBuilder embedBuilder = new EmbedBuilder()
-                .setColor(Color.BLUE)
-                .setTitle("🎁 ¡Alimento obtenido!")
-                .setDescription("Has recibido " + quantity + " " + foodItem.getName())
-                .addField("Restaura", "+" + selectedFood.getHealth_added() + " HP", true)
-                .addField("Usa", "s!eat " + foodItem.getName() + " para consumirlo", true)
-                .setFooter("Space Survival Bot", null);
-
-        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
 }

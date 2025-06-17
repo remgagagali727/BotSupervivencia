@@ -67,6 +67,7 @@ public class PlayerController {
         playerRepository.save(player);
     }
 
+    // no ma escribe bien inventario
     public void invetory(String command, MessageReceivedEvent event) {
         if(command.startsWith("i ")) command = command.substring(2);
         else if(command.startsWith("inventory ")) command = command.substring(10);

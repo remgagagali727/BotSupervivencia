@@ -11,20 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Long> {
-    /**
-     * Encuentra comida por nombre (búsqueda parcial, insensible a mayúsculas/minúsculas)
-     */
     @Query("SELECT f FROM Food f JOIN f.item i WHERE LOWER(i.name) LIKE LOWER(concat('%', ?1, '%'))")
     List<Food> findByItemNameContaining(String name);
-
-    /**
-     * Verifica si un item es comida por su ID
-     */
     boolean existsById(Long itemId);
-    
-    /**
-     * Encuentra comida por nombre exacto 
-     */
     @Query("SELECT f FROM Food f JOIN f.item i WHERE LOWER(i.name) = LOWER(:name)")
     Optional<Food> findByExactName(@Param("name") String name);
     

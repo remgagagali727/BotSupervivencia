@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.javapoet.ClassName;
 import org.springframework.stereotype.Controller;
 
 import java.awt.*;
@@ -88,7 +89,7 @@ public class PlayerController {
         StringBuilder mes = new StringBuilder("**Inventory of " + event.getAuthor().getEffectiveName() + "**\n");
         for(int i = (int) page * 10;i < Long.min((page + 1) * 10, inventory.size());i++) {
             Item item = inventory.get(Math.toIntExact(i)).getItem();
-            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + " " + inventory.get(i).getAmount() + "\n";
+            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + " **'" + inventory.get(i).getAmount() + "'**\n";
             mes.append(items);
         }
         mes.append("Page ").append(page + 1);
@@ -164,5 +165,29 @@ public class PlayerController {
         savePlayer(coinPlayer);
         savePlayer(player);
         event.getChannel().sendMessageEmbeds(eb.build()).queue();
+    }
+
+    @Transactional
+    public void addToInventory(Item item, String number, MessageReceivedEvent event) {
+        Player player = getPlayer(event.getAuthor().getIdLong());
+        Optional<ItemRelation> oitemRelation = itemRelationRepository.findByPlayerAndItem(player, item);
+        ItemRelation itemRelation;
+        if(oitemRelation.isEmpty()) {
+            itemRelation = new ItemRelation();
+            itemRelation.setPlayer(player);
+            itemRelation.setItem(item);
+            itemRelation.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+            itemRelation.setAmount(number);
+        } else {
+            itemRelation = oitemRelation.get();
+            itemRelation.setPlayer(player);
+            itemRelation.setItem(item);
+            itemRelation.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+            System.out.println(itemRelation.getAmount());
+            System.out.println(player.getId() + " " + item.getName());
+            itemRelation.setAmount(new BigInteger(number).add
+                    (new BigInteger(itemRelation.getAmount())).toString());
+        }
+        itemRelationRepository.save(itemRelation);
     }
 }

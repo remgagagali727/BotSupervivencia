@@ -2,6 +2,7 @@ package com.remgagagali727.discord.survplanet.controller;
 
 import com.remgagagali727.discord.survplanet.entity.Food;
 import com.remgagagali727.discord.survplanet.entity.Item;
+import com.remgagagali727.discord.survplanet.entity.ItemRelation;
 import com.remgagagali727.discord.survplanet.entity.Player;
 import com.remgagagali727.discord.survplanet.repository.FoodRepository;
 import com.remgagagali727.discord.survplanet.repository.ItemRepository;
@@ -56,7 +57,8 @@ public class FoodController {
         }
 
         Item foodItem = null;
-        for (Item item : player.getInventory()) {
+        for (ItemRelation relation : player.getInventory()) {
+            Item item = relation.getItem();
             if (item.getName().equalsIgnoreCase(foodName)) {
                 foodItem = item;
                 break;
@@ -83,9 +85,10 @@ public class FoodController {
         int newHealth = Math.min(currentHealth + healthToAdd, maxHealth);
         player.setHealth(String.valueOf(newHealth));
 
-        Iterator<Item> iterator = player.getInventory().iterator();
+        Iterator<ItemRelation> iterator = player.getInventory().iterator();
         while (iterator.hasNext()) {
-            Item item = iterator.next();
+            ItemRelation relation = iterator.next();
+            Item item = relation.getItem();
             if (item.getId().equals(foodItem.getId())) {
                 iterator.remove();
                 break;
@@ -122,9 +125,9 @@ public class FoodController {
 
     public void getFood(String command, MessageReceivedEvent event) {
         try {
-            // Mensaje de depuración inmediato para confirmar que el método se está ejecutando
+            // Mensaje de depuración inmediato para confirmar que el método se está
             event.getChannel().sendMessage("🍽️ Procesando solicitud de comida...").queue();
-            
+
             // Verificar si tabla food existe
             boolean foodTableExists = false;
             try {
@@ -145,24 +148,24 @@ public class FoodController {
             // Obtener jugador
             Long userId = event.getAuthor().getIdLong();
             Player player = playerController.getPlayer(userId);
-            
+
             // Configurar valores predeterminados
             String foodName = "Space Apple";
             int quantity = 1;
-            
+
             // Procesar el comando para extraer nombre y cantidad
             if (command.startsWith("getfood ")) {
                 String[] parts = command.substring(8).trim().split(" ");
                 StringBuilder nameBuilder = new StringBuilder();
-                
+
                 // Extraer el último elemento como posible cantidad
                 String lastPart = parts[parts.length - 1];
                 boolean lastPartIsNumber = false;
-                
+
                 try {
                     quantity = Integer.parseInt(lastPart);
                     lastPartIsNumber = true;
-                    
+
                     // Limitar la cantidad entre 1 y 5
                     if (quantity < 1 || quantity > 5) {
                         quantity = 1;
@@ -170,57 +173,63 @@ public class FoodController {
                 } catch (NumberFormatException e) {
                     // El último elemento no es un número, es parte del nombre
                 }
-                
+
                 // Construir el nombre
                 for (int i = 0; i < (lastPartIsNumber ? parts.length - 1 : parts.length); i++) {
                     nameBuilder.append(parts[i]).append(" ");
                 }
-                
+
                 String extractedName = nameBuilder.toString().trim();
                 if (!extractedName.isEmpty()) {
                     foodName = extractedName;
                 }
             }
-            
+
             // Imprimir mensaje de lo que estamos buscando
             event.getChannel().sendMessage("Buscando: " + foodName + " (Cantidad: " + quantity + ")").queue();
-            
+
             // Buscar alimento en la base de datos
-            List<Map<String, Object>> foods = jdbcTemplate.queryForList(
-                    "SELECT i.id, i.name, f.health_added FROM item i " +
-                    "JOIN food f ON i.id = f.id " +
-                    "WHERE LOWER(i.name) LIKE ?", 
-                    "%" + foodName.toLowerCase() + "%");
-            
-            if (foods.isEmpty()) {
-                event.getChannel().sendMessage("No se encontró ningún alimento llamado \"" + foodName + 
+            List<Food> matchingFoods = foodRepository.findByItemNameContaining(foodName);
+
+            if (matchingFoods.isEmpty()) {
+                event.getChannel().sendMessage("No se encontró ningún alimento llamado \"" + foodName +
                         "\". Prueba con: Space Apple, Cosmic Bread, Alien Steak, Nebula Soup, Mars Chocolate").queue();
                 return;
             }
-            
+
             // Tomar el primer alimento encontrado
-            Map<String, Object> foodData = foods.get(0);
-            Long itemId = ((Number) foodData.get("id")).longValue();
-            String itemName = (String) foodData.get("name");
-            String healthAdded = (String) foodData.get("health_added");
-            
+            Food selectedFood = matchingFoods.get(0);
+            Item foodItem = selectedFood.getItem();
+            String healthAdded = selectedFood.getHealth_added();
+
             // Obtener el item completo
-            Optional<Item> optionalItem = itemRepository.findById(itemId);
+            Optional<Item> optionalItem = itemRepository.findById(foodItem.getId());
             if (optionalItem.isEmpty()) {
-                event.getChannel().sendMessage("Error interno: No se pudo obtener el item con ID " + itemId).queue();
+                event.getChannel().sendMessage("Error: El alimento no existe en la base de datos.").queue();
                 return;
             }
-            
-            Item foodItem = optionalItem.get();
-            
-            // Agregar el alimento al inventario
-            for (int i = 0; i < quantity; i++) {
-                player.getInventory().add(foodItem);
+            foodItem = optionalItem.get();
+            String itemName = foodItem.getName();
+
+            // Agregar el alimento al inventario - reemplaza el bucle que da error
+            boolean itemExists = false;
+            for (ItemRelation relation : player.getInventory()) {
+                if (relation.getItem().getId().equals(foodItem.getId())) {
+                    int currentAmount = Integer.parseInt(relation.getAmount());
+                    relation.setAmount(String.valueOf(currentAmount + quantity));
+                    itemExists = true;
+                    break;
+                }
             }
-            
+
+            // Si no existe, crear nueva relación
+            if (!itemExists) {
+                ItemRelation newRelation = new ItemRelation(player, foodItem, String.valueOf(quantity));
+                player.getInventory().add(newRelation);
+            }
             // Guardar el jugador
             playerController.savePlayer(player);
-            
+
             // Mensaje de confirmación con embed
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setColor(Color.GREEN)
@@ -229,13 +238,13 @@ public class FoodController {
                     .addField("Restaura", "+" + healthAdded + " HP", true)
                     .addField("Usa", "s!eat " + itemName + " para consumirlo", true)
                     .setFooter("Space Survival Bot", null);
-            
+
             event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
-            
+
         } catch (Exception e) {
             System.err.println("Error en getFood: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Asegurar que siempre se envíe un mensaje al chat incluso si hay error
             event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
         }

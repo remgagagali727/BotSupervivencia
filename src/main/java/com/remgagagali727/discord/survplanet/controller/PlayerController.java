@@ -1,8 +1,10 @@
 package com.remgagagali727.discord.survplanet.controller;
 
 import com.remgagagali727.discord.survplanet.entity.Item;
+import com.remgagagali727.discord.survplanet.entity.ItemRelation;
 import com.remgagagali727.discord.survplanet.entity.Player;
 import com.remgagagali727.discord.survplanet.repository.*;
+import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,12 +31,14 @@ public class PlayerController {
     @Autowired
     private PlanetRepository planetRepository;
 
+    @Transactional
     public Player getPlayer(long idLong) {
         Optional<Player> optionalPlayer = playerRepository.findById(idLong);
         return optionalPlayer.orElseGet(() ->{
                     Player newPlayer = new Player(idLong);
-                    newPlayer.setCoins("0");
+                    newPlayer.setCoins("1");
                     newPlayer.setHealth("100");
+                    newPlayer.setMaxHealth("100");
                     newPlayer.setDrill(drillRepository.getReferenceById(1L));
                     newPlayer.setRod(rodRepository.getReferenceById(2L));
                     newPlayer.setWeapon(weaponRepository.getReferenceById(3L));
@@ -44,10 +48,17 @@ public class PlayerController {
                     newPlayer.setN_hunt(LocalDateTime.now());
                     newPlayer.setArrive(LocalDateTime.now());
                     newPlayer.setPlanet(planetRepository.getReferenceById(2L));
-                    newPlayer.setInventory(List.of(itemRepository.getReferenceById(4L),
-                            itemRepository.getReferenceById(1L),
-                            itemRepository.getReferenceById(2L),
-                            itemRepository.getReferenceById(3L)));
+                    List<ItemRelation> inventory = new java.util.ArrayList<>(List.of());
+                    for(long i = 1;i <= 4;i++) {
+                        ItemRelation itemRelation = new ItemRelation();
+                        itemRelation.setPlayer(newPlayer);
+                        Item item = itemRepository.findById(i).get();
+                        itemRelation.setItem(item);
+                        itemRelation.setAmount("1");
+                        itemRelation.setId(new ItemRelation.ItemRelationId(newPlayer.getId(), item.getId()));
+                        inventory.add(itemRelation);
+                    }
+                    newPlayer.setInventory(inventory);
                     return playerRepository.save(newPlayer);
                 });
     }
@@ -68,12 +79,12 @@ public class PlayerController {
             return;
         }
         Player player = getPlayer(event.getAuthor().getIdLong());
-        List<Item> inventory = player.getInventory();
+        List<ItemRelation> inventory = player.getInventory();
         page = Long.min(page - 1, (inventory.size() - 1) / 10);
         StringBuilder mes = new StringBuilder("**Inventory of " + event.getAuthor().getEffectiveName() + "**\n");
         for(int i = (int) page * 10;i < Long.min((page + 1) * 10, inventory.size());i++) {
-            Item item = inventory.get(Math.toIntExact(i));
-            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + "\n";
+            Item item = inventory.get(Math.toIntExact(i)).getItem();
+            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + " " + inventory.get(i).getAmount() + "\n";
             mes.append(items);
         }
         mes.append("Page ").append(page + 1);

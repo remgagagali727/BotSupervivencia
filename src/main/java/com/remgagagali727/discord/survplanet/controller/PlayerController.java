@@ -36,8 +36,9 @@ public class PlayerController {
         Optional<Player> optionalPlayer = playerRepository.findById(idLong);
         return optionalPlayer.orElseGet(() ->{
                     Player newPlayer = new Player(idLong);
-                    newPlayer.setCoins("0");
+                    newPlayer.setCoins("1");
                     newPlayer.setHealth("100");
+                    newPlayer.setMaxHealth("100");
                     newPlayer.setDrill(drillRepository.getReferenceById(1L));
                     newPlayer.setRod(rodRepository.getReferenceById(2L));
                     newPlayer.setWeapon(weaponRepository.getReferenceById(3L));

@@ -23,6 +23,12 @@ public class ItemController {
     DrillRepository drillRepository;
     @Autowired
     RodRepository rodRepository;
+    @Autowired
+    PlanetRepository planetRepository;
+    @Autowired
+    TypeRepository typeRepository;
+    @Autowired
+    LootRepository lootRepository;
 
     public void addItem(String command, MessageReceivedEvent event) {
         try {
@@ -107,6 +113,34 @@ public class ItemController {
             new BigInteger(s[1]);
             spaceshipRepository.save(i);
             event.getChannel().sendMessage("Chi che pudo").queue();
+        } catch (Exception e) {
+            System.out.println(e);
+            UniverseController.invalidCommand(event);
+        }
+    }
+
+    @Transactional
+    public void addLoot(String command, MessageReceivedEvent event) {
+        try{
+            String s[] = command.split(", ");
+
+            Long pid = Long.parseLong(s[0]);
+            Long iid = Long.parseLong(s[1]);
+            Long tid = Long.parseLong(s[2]);
+            new BigInteger(s[3]);
+
+            Loot loot = new Loot();
+            Planet planet = planetRepository.findById(pid).get();
+            Item item = itemRepository.findById(iid).get();
+            Type type = typeRepository.findById(tid).get();
+
+            loot.setPlanet(planet);
+            loot.setItem(item);
+            loot.setAmount(s[3]);
+            loot.setType(type);
+            loot.setId(new Loot.LootId(planet.getId(), item.getId(), type.getId()));
+            lootRepository.save(loot);
+            event.getChannel().sendMessage("Chi che pudo, loot").queue();
         } catch (Exception e) {
             System.out.println(e);
             UniverseController.invalidCommand(event);

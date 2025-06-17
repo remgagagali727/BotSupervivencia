@@ -35,7 +35,7 @@ public class Loot {
     @Embeddable
     @Setter
     @Getter
-    public class LootId implements Serializable {
+    public static class LootId implements Serializable {
         private Long planetId;
         private Long itemId;
         private Long typeId;
@@ -49,7 +49,6 @@ public class Loot {
             this.typeId = typeId;
         }
 
-        // equals y hashCode son esenciales para clave compuesta
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

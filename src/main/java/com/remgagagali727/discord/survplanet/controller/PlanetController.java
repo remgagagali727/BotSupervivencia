@@ -5,6 +5,7 @@ import com.remgagagali727.discord.survplanet.repository.ItemRelationRepository;
 import com.remgagagali727.discord.survplanet.repository.LootRepository;
 import com.remgagagali727.discord.survplanet.repository.PlanetRepository;
 import com.remgagagali727.discord.survplanet.repository.TypeRepository;
+import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import java.awt.*;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.List;
 
@@ -38,15 +41,24 @@ public class PlanetController{
     private static final long FISH = 1;
     private static final long MINE = 2;
 
+    @Transactional
     public void mine(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
         Player player = playerController.getPlayer(event.getAuthor().getIdLong());
         if(!player.isOnPlanet()) {
-            message.setTitle("You are not in a planet, wait until you get to one in order to mine :D");
+            LocalDateTime localDateTime = player.getN_mine();
+            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+            String tiempo = "<t:" + timeStamp + ":R>";
+            message.setTitle("You are not in a planet, you will arive to a planet " + tiempo);
             message.setColor(Color.BLACK);
         } else if(minCooldown(player)) {
             message.setTitle("Oh no, your drill is currently in cooldown...");
-            message.addField("Cooldown", "you can mine at " + player.getN_mine() + " try later :p", false);
+
+            LocalDateTime localDateTime = player.getN_mine();
+            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+            String tiempo = "<t:" + timeStamp + ":R>";
+
+            message.addField("Cooldown", "you can mine <t:" + timeStamp + ":R> try later :p", false);
         } else {
             Planet planet = player.getPlanet();
             BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getDrill().getToughness()));
@@ -57,8 +69,8 @@ public class PlanetController{
                 return;
             }
             BigInteger damage = bgot.multiply(extraMinutes);
-            if(damage.compareTo(new BigInteger(player.getHealth())) > 0) {
-                event.getChannel().sendMessage("You would get killed if you mined here, thank the god of this planet for saving you").queue();
+            if(damage.compareTo(new BigInteger(player.getHealth())) >= 0) {
+                playerController.kill(event);
                 return;
             }
             BigInteger health = new BigInteger(player.getHealth());
@@ -67,32 +79,37 @@ public class PlanetController{
             BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getDrill().getToughness()));
             LocalDateTime newMine = LocalDateTime.now().plusMinutes(extraMinutes.intValueExact());
             List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(MINE));
-            StringBuilder msg = new StringBuilder("**You got**\n");
-            msg.append(extraCoins).append(" coins!!!\n");
+            message.addField("Coins :coin:", extraCoins.toString(), true);
             for(Loot loot : loots) {
                 got = (int)(Math.random() * 3 + 1);
+                bgot = new BigInteger(String.valueOf(got));
                 Item item = loot.getItem();
                 Optional<ItemRelation> itemRelationOptional = itemre.findByPlayerAndItem(player, item);
                 ItemRelation nir = new ItemRelation();
+                BigInteger newAmount = bgot.multiply(new BigInteger(loot.getAmount())).multiply(new BigInteger(planet.getToughness()));
+                message.addField(item.getName(), newAmount.toString(), true);
                 if(itemRelationOptional.isEmpty()) {
                     nir.setItem(item);
                     nir.setPlayer(player);
-                    nir.setAmount(String.valueOf(got));
+                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+                    nir.setAmount(newAmount.toString());
                 } else {
                     nir = itemRelationOptional.get();
-                    nir.setAmount(new BigInteger(nir.getAmount()).add(new BigInteger(String.valueOf(got))).toString());
+                    nir.setItem(item);
+                    nir.setPlayer(player);
+                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+                    newAmount = newAmount.add(new BigInteger(nir.getAmount()));
+                    nir.setAmount(newAmount.toString());
                 }
                 itemre.save(nir);
-                msg.append(got).append(" ").append(item.getName()).append('\n');
             }
-            msg.append("And you lost ").append(damage).append(" hearts");
+            message.addField("Lost hearts :broken_heart:", damage.toString(), true);
             player.setN_mine(newMine);
             player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
             playerController.savePlayer(player);
             message.setColor(Color.YELLOW);
-            message.setAuthor(event.getAuthor().getEffectiveName() + " is mining at planet " + player.getPlanet().getName());
+            message.setAuthor(event.getAuthor().getEffectiveName() + " just mined at planet " + player.getPlanet().getName() + " and got...");
             message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWttOTZ6dHNhZjQycXI3ZzR5ZzBndDV5bWdiZW1rZXJjNGNvYng3aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KbCaO3y2yH5qo/giphy.gif");
-            event.getChannel().sendMessage(msg.toString()).queue();
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }

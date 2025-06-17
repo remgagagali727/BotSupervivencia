@@ -47,7 +47,7 @@ public class BotController {
                 return;
             case "i":
             case "inventory":
-                playerController.invetory("i 1", event);
+                playerController.inventory("i 1", event);
                 return;
             case "planets":
                 planetController.planets("planets 1", event);
@@ -63,12 +63,14 @@ public class BotController {
             if(command.startsWith("rod ")) itemController.addRod(command.substring(4), event);
             if(command.startsWith("wea ")) itemController.addWeapon(command.substring(4), event);
             if(command.startsWith("spa ")) itemController.addSpaceship(command.substring(4), event);
+            if(command.startsWith("loot ")) itemController.addLoot(command.substring(5), event);
         }
         if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
         if(command.startsWith("items ")) itemController.items(command.substring(6), event);
         if(command.startsWith("go ")) universeController.go(command, event);
-        if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.invetory(command, event);
-        if(command.startsWith("planets ") || command.startsWith("inventory ")) planetController.planets(command, event);
+        if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.inventory(command, event);
+        if(command.startsWith("planets ")) planetController.planets(command, event);
+        if(command.startsWith("equip ")) playerController.equip(command.substring(6), event);
     }
 
     private void goHelp(MessageReceivedEvent event) {
@@ -124,7 +126,9 @@ public class BotController {
     public void handleEvent(MessageReceivedEvent event) {
         String command;
         try {
-            command = event.getMessage().getContentRaw().substring(2);
+            command = event.getMessage().getContentRaw();
+            if(!command.startsWith("s!")) return;
+            command = command.substring(2);
         } catch (Exception e) {
             command = "";
         }

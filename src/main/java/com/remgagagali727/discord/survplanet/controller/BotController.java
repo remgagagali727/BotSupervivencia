@@ -15,6 +15,8 @@ public class BotController {
     @Autowired
     private PlayerController playerController;
     @Autowired
+    private FoodController foodController;
+    @Autowired
     private ItemController itemController;
 
     private void doCommand(String command, MessageReceivedEvent event) {
@@ -55,6 +57,14 @@ public class BotController {
             case "items":
                 itemController.items("1", event);
                 return;
+            case "eat":
+                foodController.eat("", event);
+                return;
+
+            // esto esta en desarrollo entonces borrenlo cuando ya no lo usaen , es para obtener items rapido de comida y probarlos
+            case "getfood":
+                foodController.getFood("", event);
+                return;
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("alex ")) planetController.addPlanet(command.substring(5), event);
@@ -63,7 +73,7 @@ public class BotController {
             if(command.startsWith("rod ")) itemController.addRod(command.substring(4), event);
             if(command.startsWith("wea ")) itemController.addWeapon(command.substring(4), event);
             if(command.startsWith("spa ")) itemController.addSpaceship(command.substring(4), event);
-            if(command.startsWith("loot ")) itemController.addLoot(command.substring(5), event);
+            if (command.startsWith("getfood ")) foodController.getFood(command, event);
         }
         if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
         if(command.startsWith("items ")) itemController.items(command.substring(6), event);
@@ -71,6 +81,7 @@ public class BotController {
         if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.inventory(command, event);
         if(command.startsWith("planets ")) planetController.planets(command, event);
         if(command.startsWith("equip ")) playerController.equip(command.substring(6), event);
+        if (command.startsWith("eat ")) foodController.eat(command, event);
     }
 
     private void goHelp(MessageReceivedEvent event) {

@@ -1,6 +1,8 @@
 package com.remgagagali727.discord.survplanet.controller;
 
-import com.remgagagali727.discord.survplanet.entity.*;
+import com.remgagagali727.discord.survplanet.entity.Item;
+import com.remgagagali727.discord.survplanet.entity.ItemRelation;
+import com.remgagagali727.discord.survplanet.entity.Player;
 import com.remgagagali727.discord.survplanet.repository.*;
 import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -88,7 +90,7 @@ public class PlayerController {
         StringBuilder mes = new StringBuilder("**Inventory of " + event.getAuthor().getEffectiveName() + "**\n");
         for(int i = (int) page * 10;i < Long.min((page + 1) * 10, inventory.size());i++) {
             Item item = inventory.get(Math.toIntExact(i)).getItem();
-            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + " **" + inventory.get(i).getAmount() + "**\n";
+            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + " " + inventory.get(i).getAmount() + "\n";
             mes.append(items);
         }
         mes.append("Page ").append(page + 1);

@@ -6,7 +6,6 @@ import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.javapoet.ClassName;
 import org.springframework.stereotype.Controller;
 
 import java.awt.*;
@@ -19,6 +18,8 @@ import java.util.Optional;
 @Controller
 public class PlayerController {
 
+    @Autowired
+    private CraftingRepository craftingRepository;
     @Autowired
     private ItemRepository itemRepository;
     @Autowired
@@ -189,5 +190,79 @@ public class PlayerController {
                     (new BigInteger(itemRelation.getAmount())).toString());
         }
         itemRelationRepository.save(itemRelation);
+    }
+
+    @Transactional
+    public void craft(String command, MessageReceivedEvent event) {
+        event.getChannel().sendMessage("Trying to craft").queue();
+
+        if (command.isEmpty()) {
+            showHelpCraftEmbed(event);
+            return;
+        }
+
+        String itemName = command;
+        Long userId = event.getAuthor().getIdLong();
+
+        Player player = getPlayer(userId);
+
+        Optional<Item> oitem = itemRepository.findByName(command);
+        if(oitem.isEmpty()) {
+            event.getChannel().sendMessage("The item does not exist").queue();
+            return;
+        }
+
+        Item item = oitem.get();
+
+        if(item.getCrafting_price().equals("-1")) {
+            event.getChannel().sendMessage("This item cannot be crafted").queue();
+            return;
+        }
+
+        if (!player.isOnPlanet()) {
+            player.notInPlanet(event);
+            return;
+        }
+
+        List<Crafting> craftings = craftingRepository.findByItem(item);
+        for(Crafting craft : craftings) {
+            if(!has(craft.getRequired(), craft.getAmount(), player)) {
+                craftRecipe(craftings, item, event);
+                return;
+            }
+        }
+        BigInteger playerCoins = new BigInteger(player.getCoins());
+        playerCoins = playerCoins.add(new BigInteger(item.getCrafting_price()).negate());
+
+        if(playerCoins.compareTo(new BigInteger("0")) < 0) {
+            craftRecipe(craftings, item, event);
+            return;
+        }
+
+        for(Crafting craft : craftings) {
+            addToInventory(craft.getRequired(), "-" + craft.getAmount(), event);
+        }
+
+        player.setCoins(playerCoins.toString());
+        addToInventory(item, "1", event);
+
+        savePlayer(player);
+        event.getChannel().sendMessage("Successfully crafted").queue();
+    }
+
+    private void craftRecipe(List<Crafting> craftings, Item item, MessageReceivedEvent event) {
+        event.getChannel().sendMessage("In orde... bla bla bla").queue();
+    }
+
+    private boolean has(Item i, String amount, Player player) {
+        Optional<ItemRelation> optional = itemRelationRepository.findByPlayerAndItem(player, i);
+        if(optional.isEmpty()) return false;
+        BigInteger am = new BigInteger(amount);
+        BigInteger have = new BigInteger(optional.get().getAmount());
+        return am.compareTo(have) > 0;
+    }
+
+    private void showHelpCraftEmbed(MessageReceivedEvent event) {
+        event.getChannel().sendMessage("To craft... bla bla bla").queue();
     }
 }

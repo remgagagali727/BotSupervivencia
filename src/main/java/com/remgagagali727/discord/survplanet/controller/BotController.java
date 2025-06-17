@@ -60,6 +60,8 @@ public class BotController {
             case "eat":
                 foodController.eat("", event);
                 return;
+            case "craft":
+                playerController.craft("", event);
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("alex ")) planetController.addPlanet(command.substring(5), event);
@@ -77,7 +79,8 @@ public class BotController {
         if(command.startsWith("i ") || command.startsWith("inventory ")) playerController.inventory(command, event);
         if(command.startsWith("planets ")) planetController.planets(command, event);
         if(command.startsWith("equip ")) playerController.equip(command.substring(6), event);
-        if (command.startsWith("eat ")) foodController.eat(command, event);
+        if(command.startsWith("eat ")) foodController.eat(command, event);
+        if(command.startsWith("craft ")) playerController.craft(command.substring(6), event);
     }
 
     private void goHelp(MessageReceivedEvent event) {

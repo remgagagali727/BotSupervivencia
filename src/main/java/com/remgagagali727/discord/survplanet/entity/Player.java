@@ -1,5 +1,6 @@
 package com.remgagagali727.discord.survplanet.entity;
 
+import com.remgagagali727.discord.survplanet.repository.ItemRelationRepository;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter

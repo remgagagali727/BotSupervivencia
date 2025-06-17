@@ -1,8 +1,6 @@
 package com.remgagagali727.discord.survplanet.controller;
 
-import com.remgagagali727.discord.survplanet.entity.Item;
-import com.remgagagali727.discord.survplanet.entity.ItemRelation;
-import com.remgagagali727.discord.survplanet.entity.Player;
+import com.remgagagali727.discord.survplanet.entity.*;
 import com.remgagagali727.discord.survplanet.repository.*;
 import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.EmbedBuilder;

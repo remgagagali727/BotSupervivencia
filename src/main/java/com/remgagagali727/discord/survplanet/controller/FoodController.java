@@ -125,10 +125,8 @@ public class FoodController {
 
     public void getFood(String command, MessageReceivedEvent event) {
         try {
-            // Mensaje de depuración inmediato para confirmar que el método se está
             event.getChannel().sendMessage("🍽️ Procesando solicitud de comida...").queue();
 
-            // Verificar si tabla food existe
             boolean foodTableExists = false;
             try {
                 List<Map<String, Object>> tables = jdbcTemplate.queryForList(
@@ -145,20 +143,16 @@ public class FoodController {
                 return;
             }
 
-            // Obtener jugador
             Long userId = event.getAuthor().getIdLong();
             Player player = playerController.getPlayer(userId);
 
-            // Configurar valores predeterminados
             String foodName = "Space Apple";
             int quantity = 1;
 
-            // Procesar el comando para extraer nombre y cantidad
             if (command.startsWith("getfood ")) {
                 String[] parts = command.substring(8).trim().split(" ");
                 StringBuilder nameBuilder = new StringBuilder();
 
-                // Extraer el último elemento como posible cantidad
                 String lastPart = parts[parts.length - 1];
                 boolean lastPartIsNumber = false;
 
@@ -166,7 +160,6 @@ public class FoodController {
                     quantity = Integer.parseInt(lastPart);
                     lastPartIsNumber = true;
 
-                    // Limitar la cantidad entre 1 y 5
                     if (quantity < 1 || quantity > 5) {
                         quantity = 1;
                     }

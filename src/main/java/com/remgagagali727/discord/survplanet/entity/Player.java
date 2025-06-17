@@ -33,6 +33,7 @@ public class Player {
     private LocalDateTime n_mine;
     private LocalDateTime n_hunt;
     private String health;
+    private String maxHealth;
     @ManyToOne
     @JoinColumn(name = "id_planet")
     private Planet planet;

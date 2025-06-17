@@ -29,7 +29,7 @@ public class ProfileController{
             eBuilder.addField("Location", "in Space", true);
         }
 
-        eBuilder.addField("Health", player.getHealth() + " ❤", true);
+        eBuilder.addField("Health", player.getHealth() + " ❤ / " + player.getMaxHealth()  + " ❤", true);
 
         event.getChannel().sendMessageEmbeds(eBuilder.build()).queue();
     }

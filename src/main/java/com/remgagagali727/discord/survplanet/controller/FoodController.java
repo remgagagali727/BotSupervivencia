@@ -52,7 +52,7 @@ public class FoodController {
             return;
         }
 
-        String foodName = command;
+        String foodName = command.trim();
         Long userId = event.getAuthor().getIdLong();
 
         Player player = playerController.getPlayer(userId);

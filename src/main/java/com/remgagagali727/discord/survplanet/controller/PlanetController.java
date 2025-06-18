@@ -179,7 +179,7 @@ public class PlanetController{
             playerController.savePlayer(player);
             message.setColor(Color.CYAN);
             message.setAuthor(event.getAuthor().getEffectiveName() + " just fished at planet " + player.getPlanet().getName() + " and got...");
-            message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2RybmEweXIwcXUwY2djZnE5djlxNHZ6Y2Q4OTU3NTFyejdwcW42YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/G5tA3ZSgiBiIo/giphy.gif");
+            message.setImage("https://gifdb.com/images/high/under-water-sea-monster-mosasaurus-j5yo553nbgqb5crp.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
@@ -290,15 +290,15 @@ public class PlanetController{
             return;
         }
         List<Planet> planets = planetRepository.findAll();
-        page = Long.min(page - 1, (planets.size() - 1) / 10);
+        page = Long.min(page - 1, (planets.size() - 1) / 8);
         StringBuilder mes = new StringBuilder("**Planets**\n");
         planets.sort(Comparator.comparing(p -> new BigInteger(p.getToughness())));
-        for(int i = (int) page * 10;i < Long.min((page + 1) * 10, planets.size());i++) {
+        for(int i = (int) page * 8;i < Long.min((page + 1) * 8, planets.size());i++) {
             Planet item = planets.get(i);
-            String items = "(" + item.getId() + ") " + item.getName() + " " + item.getToughness() + "\n";
+            String items = "`[" + item.getId() + "]` **" + item.getName() + "**\n\tDifficulty: **" + item.getToughness() + "**\n";
             mes.append(items);
         }
-        mes.append("Page ").append(page + 1);
+        mes.append("Page ").append(page + 1).append(" / ").append((planets.size() + 7) / 8);
         event.getChannel().sendMessage(mes.toString()).queue();
     }
 }

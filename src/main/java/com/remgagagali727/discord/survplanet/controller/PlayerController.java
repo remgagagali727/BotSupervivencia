@@ -86,14 +86,14 @@ public class PlayerController {
         }
         Player player = getPlayer(event.getAuthor().getIdLong());
         List<ItemRelation> inventory = player.getInventory();
-        page = Long.min(page - 1, (inventory.size() - 1) / 10);
+        page = Long.min(page - 1, (inventory.size() - 1) / 5);
         StringBuilder mes = new StringBuilder("**Inventory of " + event.getAuthor().getEffectiveName() + "**\n");
-        for(int i = (int) page * 10;i < Long.min((page + 1) * 10, inventory.size());i++) {
+        for(int i = (int) page * 5;i < Long.min((page + 1) * 5, inventory.size());i++) {
             Item item = inventory.get(Math.toIntExact(i)).getItem();
-            String items = "(" + item.getId() + ") " + item.getName() + " -> " + item.getDescription() + " **'" + inventory.get(i).getAmount() + "'**\n";
+            String items = "`[" + item.getId() + "]` **" + item.getName() + "**\n\t**Description:** " + item.getDescription() + "\n\t**Quantity:** `" + inventory.get(i).getAmount() + "`\n";
             mes.append(items);
         }
-        mes.append("Page ").append(page + 1);
+        mes.append("Page ").append(page + 1).append(" / ").append((inventory.size() + 4) / 5);
         event.getChannel().sendMessage(mes.toString()).queue();
     }
 

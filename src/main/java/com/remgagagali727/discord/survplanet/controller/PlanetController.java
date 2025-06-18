@@ -92,7 +92,7 @@ public class PlanetController{
             playerController.savePlayer(player);
             message.setColor(Color.YELLOW);
             message.setAuthor(event.getAuthor().getEffectiveName() + " just mined at planet " + player.getPlanet().getName() + " and got...");
-            message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWttOTZ6dHNhZjQycXI3ZzR5ZzBndDV5bWdiZW1rZXJjNGNvYng3aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KbCaO3y2yH5qo/giphy.gif");
+            message.setImage("https://i.pinimg.com/originals/75/53/04/755304e8b2663bf209cd94edf19d10d8.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
@@ -259,7 +259,7 @@ public class PlanetController{
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
     private boolean huntCooldown(Player player) {
-        return player.getN_fish().isAfter(LocalDateTime.now());
+        return player.getN_hunt().isAfter(LocalDateTime.now());
     }
 
     private boolean inCooldown() {

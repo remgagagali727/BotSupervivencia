@@ -75,6 +75,9 @@ public class BotController {
             if(command.startsWith("recipe ")) itemController.addRecipe(command.substring(7), event);
             if(command.startsWith("cprice ")) itemController.setCraftingPrice(command.substring(7), event);
             if(command.startsWith("sprice ")) itemController.setSellPrice(command.substring(7), event);
+            if(command.startsWith("loot ")) itemController.addLoot(command.substring(5), event);
+            if(command.equals("reset")) playerController.resetTimes(event);
+            if(command.equals("heal")) playerController.heal(event);
         }
         if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
         if(command.startsWith("items ")) itemController.items(command.substring(6), event);

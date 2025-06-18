@@ -1,6 +1,7 @@
 package com.remgagagali727.discord.survplanet.entity;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.util.List;
 @Setter
 @Entity
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Planet{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +25,4 @@ public class Planet{
     private List<Player> players;
     @OneToMany
     private List<Loot> loots;
-
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof Planet o)) return false;
-        return o.name.equals(name);
-    }
 }

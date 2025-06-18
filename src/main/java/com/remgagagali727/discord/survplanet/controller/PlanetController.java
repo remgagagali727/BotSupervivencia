@@ -46,19 +46,17 @@ public class PlanetController{
         EmbedBuilder message = new EmbedBuilder();
         Player player = playerController.getPlayer(event.getAuthor().getIdLong());
         if(!player.isOnPlanet()) {
-            LocalDateTime localDateTime = player.getN_mine();
-            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
-            String tiempo = "<t:" + timeStamp + ":R>";
-            message.setTitle("You are not in a planet, you will arive to a planet " + tiempo);
-            message.setColor(Color.BLACK);
-        } else if(minCooldown(player)) {
+            player.notInPlanet(event);
+            return;
+        }
+        if(minCooldown(player)) {
             message.setTitle("Oh no, your drill is currently in cooldown...");
 
             LocalDateTime localDateTime = player.getN_mine();
             long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
             String tiempo = "<t:" + timeStamp + ":R>";
 
-            message.addField("Cooldown", "you can mine <t:" + timeStamp + ":R> try later :p", false);
+            message.addField("Cooldown", "you can mine " + tiempo + "  try later :p", false);
         } else {
             Planet planet = player.getPlanet();
             BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getDrill().getToughness()));
@@ -83,24 +81,9 @@ public class PlanetController{
                 got = (int)(Math.random() * 3 + 1);
                 bgot = new BigInteger(String.valueOf(got));
                 Item item = loot.getItem();
-                Optional<ItemRelation> itemRelationOptional = itemre.findByPlayerAndItem(player, item);
-                ItemRelation nir = new ItemRelation();
                 BigInteger newAmount = bgot.multiply(new BigInteger(loot.getAmount())).multiply(new BigInteger(planet.getToughness()));
                 message.addField(item.getName(), newAmount.toString(), true);
-                if(itemRelationOptional.isEmpty()) {
-                    nir.setItem(item);
-                    nir.setPlayer(player);
-                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
-                    nir.setAmount(newAmount.toString());
-                } else {
-                    nir = itemRelationOptional.get();
-                    nir.setItem(item);
-                    nir.setPlayer(player);
-                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
-                    newAmount = newAmount.add(new BigInteger(nir.getAmount()));
-                    nir.setAmount(newAmount.toString());
-                }
-                itemre.save(nir);
+                playerController.addToInventory(item, newAmount.toString(), event);
             }
             message.addField("Lost hearts :broken_heart:", damage.toString(), true);
             player.setN_mine(newMine);

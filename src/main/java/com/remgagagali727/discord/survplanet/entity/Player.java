@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +55,13 @@ public class Player {
     }
 
     public void notInPlanet(MessageReceivedEvent event) {
-        event.getChannel().sendMessage("You will arrive to the planet " + planet.getName() + " at " + arrive).queue();
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder
+                .setFooter("Survival Universe Planet")
+                .setTitle(event.getAuthor().getEffectiveName() + " you are not in a planet!")
+                .setDescription("You cannot do this action while in space")
+                .setImage("https://cdn.pixabay.com/animation/2022/11/16/14/56/14-56-49-778_512.gif")
+                .setColor(Color.BLUE);
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 }

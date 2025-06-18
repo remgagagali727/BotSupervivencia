@@ -280,4 +280,22 @@ public class PlayerController {
     private void showHelpCraftEmbed(MessageReceivedEvent event) {
         event.getChannel().sendMessage("To craft... bla bla bla").queue();
     }
+
+    public void resetTimes(MessageReceivedEvent event) {
+        Player player = getPlayer(event.getAuthor().getIdLong());
+        LocalDateTime now = LocalDateTime.now();
+        player.setN_hunt(now);
+        player.setN_mine(now);
+        player.setN_fish(now);
+        player.setArrive(now);
+        savePlayer(player);
+        event.getChannel().sendMessage("Ya listo :p eres nuevo").queue();
+    }
+
+    public void heal(MessageReceivedEvent event) {
+        Player player = getPlayer(event.getAuthor().getIdLong());
+        player.setHealth(player.getMaxHealth());
+        savePlayer(player);
+        event.getChannel().sendMessage("Ya listo curado").queue();
+    }
 }

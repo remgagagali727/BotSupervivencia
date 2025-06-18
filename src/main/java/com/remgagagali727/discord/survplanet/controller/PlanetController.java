@@ -63,7 +63,7 @@ public class PlanetController{
             int got = (int)(Math.random() * 3 + 1);
             BigInteger bgot = new BigInteger(String.valueOf(got));
             if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
-                event.getChannel().sendMessage("You would need " + extraMinutes + " minutes to mine here but thats to much, you can't mine here").queue();
+                longAction("mine", event);
                 return;
             }
             BigInteger damage = bgot.multiply(extraMinutes);
@@ -95,6 +95,17 @@ public class PlanetController{
             message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWttOTZ6dHNhZjQycXI3ZzR5ZzBndDV5bWdiZW1rZXJjNGNvYng3aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KbCaO3y2yH5qo/giphy.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
+    }
+
+    private void longAction(String text, MessageReceivedEvent event) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle("Oh no!!!")
+                .setDescription("To " + text + " here you would need more than 200 minutes you can't do that!!!")
+                .setFooter("Survival Universe Bot")
+                .setColor(Color.yellow);
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
     private boolean minCooldown(Player player) {

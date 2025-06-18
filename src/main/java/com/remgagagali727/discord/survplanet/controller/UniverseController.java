@@ -139,7 +139,7 @@ public class UniverseController{
         if(optionalPlanet.isEmpty()) {
             optionalPlanet = planetRepository.findByName(command);
             if(optionalPlanet.isEmpty()) {
-                invalidCommand(event);
+                invalidPlanet(event);
                 return;
             } else {
                 planet = optionalPlanet.get();
@@ -154,7 +154,7 @@ public class UniverseController{
         }
         Planet playerPlanet = player.getPlanet();
         if(planet.equals(playerPlanet)) {
-            event.getChannel().sendMessage("You are already in that planet :D").queue();
+            alreadyInPlanet(event);
             return;
         }
         BigDecimal x1, x2, y1, y2;
@@ -164,15 +164,54 @@ public class UniverseController{
         y2 = new BigDecimal(playerPlanet.getY());
         BigDecimal time = (x1.add(x2.negate()).abs().pow(2).add(y1.add(y2.negate()).abs().pow(2))).sqrt(new MathContext(10)).divide(new BigDecimal(player.getSpaceship().getSpeed()));
         if(time.compareTo(BigDecimal.valueOf(120)) > 0) {
-            event.getChannel().sendMessage("The time is too long (more than 2 hours) you cant go there").queue();
+            longTravel(event);
             return;
         }
         double mtime = time.doubleValue();
-        player.setArrive(LocalDateTime.now().plusMinutes((long) mtime));
+        LocalDateTime arr = LocalDateTime.now().plusMinutes((long) mtime);
+        player.setArrive(arr);
         player.setPlanet(planet);
         playerController.savePlayer(player);
-        event.getChannel().sendMessage("You will arrive to " + planet.getName() + " at " + LocalDateTime.now().plusMinutes((long) mtime)).queue();
-        event.getChannel().sendMessage("In exactly " + (long)mtime + " minutes").queue();
+
+        long timeStamp = arr.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+        String tiempo = "<t:" + timeStamp + ":R>";
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("It's time to travel!!!")
+                .setDescription("You will arrive to " + planet.getName() + " " + tiempo)
+                .setFooter("Survival Universe Bot")
+                .setColor(Color.CYAN);
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    private void longTravel(MessageReceivedEvent event) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle("Oh no!!!")
+                .setDescription("This travel would take more than 2 hours and you don't have enough fuel, try traveling to another planet")
+                .setFooter("Survival Universe Bot")
+                .setColor(Color.yellow);
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    private void alreadyInPlanet(MessageReceivedEvent event) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle("You are already in that planet")
+                .setColor(Color.YELLOW)
+                .setFooter("Survival Universe Bot");
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    private void invalidPlanet(MessageReceivedEvent event) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("That's not a planet!!! :ringed_planet:");
+        embedBuilder.setColor(Color.MAGENTA);
+        embedBuilder.setFooter("Survival Universe Bot");
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
     public static void invalidCommand(MessageReceivedEvent event) {

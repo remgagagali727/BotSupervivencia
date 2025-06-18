@@ -42,10 +42,10 @@ public class BotController {
                 return;
             case "cas":
             case "casino":
-                casHelp(event);
+                universeController.casino("cas", event);
                 return;
             case "go":
-                goHelp(event);
+                universeController.go("go", event);
                 return;
             case "i":
             case "inventory":
@@ -95,15 +95,6 @@ public class BotController {
                 ie.
                 s!go 1
                 s!go earth
-                """;
-        help(helpMessage, event);
-    }
-
-    private void casHelp(MessageReceivedEvent event) {
-        String helpMessage = """
-                In order to use the casino command you need to put an amount of coins just after the command
-                ie.
-                s!casino 100
                 """;
         help(helpMessage, event);
     }

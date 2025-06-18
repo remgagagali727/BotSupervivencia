@@ -183,7 +183,7 @@ public class PlanetController{
             player.setN_mine(newMine);
             player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
             playerController.savePlayer(player);
-            message.setColor(Color.YELLOW);
+            message.setColor(Color.CYAN);
             message.setAuthor(event.getAuthor().getEffectiveName() + " just fished at planet " + player.getPlanet().getName() + " and got...");
             message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2RybmEweXIwcXUwY2djZnE5djlxNHZ6Y2Q4OTU3NTFyejdwcW42YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/G5tA3ZSgiBiIo/giphy.gif");
         }
@@ -258,7 +258,7 @@ public class PlanetController{
             player.setN_mine(newMine);
             player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
             playerController.savePlayer(player);
-            message.setColor(Color.YELLOW);
+            message.setColor(Color.RED);
             message.setAuthor(event.getAuthor().getEffectiveName() + " just hunted at planet " + player.getPlanet().getName() + " and got...");
             message.setImage("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDBjaGg4NWRyZjc1aXQ2eDl0bDRzaHoyeWFkc240dXYzN3A2NWtubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FDFi1PMVdrMbivlfhf/giphy.gif");
         }

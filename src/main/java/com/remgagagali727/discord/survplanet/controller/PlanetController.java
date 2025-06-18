@@ -120,28 +120,152 @@ public class PlanetController{
 
     public void fish(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
-        if(inCooldown()) {
+        Player player = playerController.getPlayer(event.getAuthor().getIdLong());
+        if(!player.isOnPlanet()) {
+            LocalDateTime localDateTime = player.getN_mine();
+            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+            String tiempo = "<t:" + timeStamp + ":R>";
+            message.setTitle("You are not in a planet, you will arive to a planet " + tiempo);
+            message.setColor(Color.BLACK);
+        } else if(fishCooldown(player)) {
             message.setTitle("Oh no, your fishing rod is currently in cooldown...");
-            message.addField("Cooldown", "you can fish at %time% try later :p", false);
+
+            LocalDateTime localDateTime = player.getN_mine();
+            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+            String tiempo = "<t:" + timeStamp + ":R>";
+
+            message.addField("Cooldown", "you can fish <t:" + timeStamp + ":R> try later :p", false);
         } else {
+            Planet planet = player.getPlanet();
+            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getRod().getToughness()));
+            int got = (int)(Math.random() * 3 + 1);
+            BigInteger bgot = new BigInteger(String.valueOf(got));
+            if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
+                event.getChannel().sendMessage("You would need " + extraMinutes + " minutes to fish here but thats to much, you can't fish here").queue();
+                return;
+            }
+            BigInteger damage = bgot.multiply(extraMinutes);
+            if(damage.compareTo(new BigInteger(player.getHealth())) >= 0) {
+                playerController.kill(event);
+                return;
+            }
+            BigInteger health = new BigInteger(player.getHealth());
+            health = health.add(damage.negate());
+            player.setHealth(health.toString());
+            BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getRod().getToughness()));
+            LocalDateTime newMine = LocalDateTime.now().plusMinutes(extraMinutes.intValueExact());
+            List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(FISH));
+            message.addField("Coins :coin:", extraCoins.toString(), true);
+            for(Loot loot : loots) {
+                got = (int)(Math.random() * 3 + 1);
+                bgot = new BigInteger(String.valueOf(got));
+                Item item = loot.getItem();
+                Optional<ItemRelation> itemRelationOptional = itemre.findByPlayerAndItem(player, item);
+                ItemRelation nir = new ItemRelation();
+                BigInteger newAmount = bgot.multiply(new BigInteger(loot.getAmount())).multiply(new BigInteger(planet.getToughness()));
+                message.addField(item.getName(), newAmount.toString(), true);
+                if(itemRelationOptional.isEmpty()) {
+                    nir.setItem(item);
+                    nir.setPlayer(player);
+                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+                    nir.setAmount(newAmount.toString());
+                } else {
+                    nir = itemRelationOptional.get();
+                    nir.setItem(item);
+                    nir.setPlayer(player);
+                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+                    newAmount = newAmount.add(new BigInteger(nir.getAmount()));
+                    nir.setAmount(newAmount.toString());
+                }
+                itemre.save(nir);
+            }
+            message.addField("Lost hearts :broken_heart:", damage.toString(), true);
+            player.setN_mine(newMine);
+            player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
+            playerController.savePlayer(player);
             message.setColor(Color.CYAN);
-            message.setAuthor(event.getAuthor().getEffectiveName() + " is fishing at planet " + "%planet%");
-            message.setImage("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHFwemt2cTh5M2swcXFheTNpZnA2Z3RpM2Y5N3NsNHRvZThkZnZzaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SiEJuFiOrNHeRjYmUy/giphy.gif");
+            message.setAuthor(event.getAuthor().getEffectiveName() + " just fished at planet " + player.getPlanet().getName() + " and got...");
+            message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2RybmEweXIwcXUwY2djZnE5djlxNHZ6Y2Q4OTU3NTFyejdwcW42YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/G5tA3ZSgiBiIo/giphy.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
+    }
+    private boolean fishCooldown(Player player) {
+        return player.getN_fish().isAfter(LocalDateTime.now());
     }
 
     public void hunt(MessageReceivedEvent event) {
         EmbedBuilder message = new EmbedBuilder();
-        if(inCooldown()) {
+        Player player = playerController.getPlayer(event.getAuthor().getIdLong());
+        if(!player.isOnPlanet()) {
+            LocalDateTime localDateTime = player.getN_mine();
+            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+            String tiempo = "<t:" + timeStamp + ":R>";
+            message.setTitle("You are not in a planet, you will arive to a planet " + tiempo);
+            message.setColor(Color.BLACK);
+        } else if(huntCooldown(player)) {
             message.setTitle("Oh no, your weapon is currently in cooldown...");
-            message.addField("Cooldown", "you can hunt at %time% try later :p", false);
+
+            LocalDateTime localDateTime = player.getN_mine();
+            long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
+            String tiempo = "<t:" + timeStamp + ":R>";
+
+            message.addField("Cooldown", "you can hunt <t:" + timeStamp + ":R> try later :p", false);
         } else {
-            message.setColor(Color.BLUE);
-            message.setAuthor(event.getAuthor().getEffectiveName() + " is hunting at planet " + "%planet%");
-            message.setImage("https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWVsZXB4b3F6Y2tsajMxdGJjcWhvYWxpeHFvMzN4enN4ejE1eDJ3OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BDSZj7aLlvE7MXa90V/giphy.gif");
+            Planet planet = player.getPlanet();
+            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getWeapon().getToughness()));
+            int got = (int)(Math.random() * 3 + 1);
+            BigInteger bgot = new BigInteger(String.valueOf(got));
+            if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
+                event.getChannel().sendMessage("You would need " + extraMinutes + " minutes to hunt here but thats to much, you can't hunt here").queue();
+                return;
+            }
+            BigInteger damage = bgot.multiply(extraMinutes);
+            if(damage.compareTo(new BigInteger(player.getHealth())) >= 0) {
+                playerController.kill(event);
+                return;
+            }
+            BigInteger health = new BigInteger(player.getHealth());
+            health = health.add(damage.negate());
+            player.setHealth(health.toString());
+            BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getWeapon().getToughness()));
+            LocalDateTime newMine = LocalDateTime.now().plusMinutes(extraMinutes.intValueExact());
+            List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(HUNT));
+            message.addField("Coins :coin:", extraCoins.toString(), true);
+            for(Loot loot : loots) {
+                got = (int)(Math.random() * 3 + 1);
+                bgot = new BigInteger(String.valueOf(got));
+                Item item = loot.getItem();
+                Optional<ItemRelation> itemRelationOptional = itemre.findByPlayerAndItem(player, item);
+                ItemRelation nir = new ItemRelation();
+                BigInteger newAmount = bgot.multiply(new BigInteger(loot.getAmount())).multiply(new BigInteger(planet.getToughness()));
+                message.addField(item.getName(), newAmount.toString(), true);
+                if(itemRelationOptional.isEmpty()) {
+                    nir.setItem(item);
+                    nir.setPlayer(player);
+                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+                    nir.setAmount(newAmount.toString());
+                } else {
+                    nir = itemRelationOptional.get();
+                    nir.setItem(item);
+                    nir.setPlayer(player);
+                    nir.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
+                    newAmount = newAmount.add(new BigInteger(nir.getAmount()));
+                    nir.setAmount(newAmount.toString());
+                }
+                itemre.save(nir);
+            }
+            message.addField("Lost hearts :broken_heart:", damage.toString(), true);
+            player.setN_mine(newMine);
+            player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
+            playerController.savePlayer(player);
+            message.setColor(Color.RED);
+            message.setAuthor(event.getAuthor().getEffectiveName() + " just hunted at planet " + player.getPlanet().getName() + " and got...");
+            message.setImage("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDBjaGg4NWRyZjc1aXQ2eDl0bDRzaHoyeWFkc240dXYzN3A2NWtubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FDFi1PMVdrMbivlfhf/giphy.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
+    }
+    private boolean huntCooldown(Player player) {
+        return player.getN_fish().isAfter(LocalDateTime.now());
     }
 
     private boolean inCooldown() {

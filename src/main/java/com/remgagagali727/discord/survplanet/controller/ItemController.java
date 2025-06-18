@@ -1,12 +1,15 @@
 package com.remgagagali727.discord.survplanet.controller;
 
 import com.remgagagali727.discord.survplanet.entity.*;
+import com.remgagagali727.discord.survplanet.listener.ReactionHandler;
 import com.remgagagali727.discord.survplanet.repository.*;
 import jakarta.transaction.Transactional;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import net.dv8tion.jda.api.EmbedBuilder;
+
 import java.awt.*;
 
 import java.math.BigInteger;
@@ -171,31 +174,38 @@ public class ItemController {
     }
 
     public void items(String command, MessageReceivedEvent event) {
-        long pageNumber;
+        long page = 0;
         try {
-            pageNumber = Long.parseLong(command);
+            if (!command.isEmpty()) {
+                page = Long.parseLong(command) - 1;
+            }
         } catch (Exception ignored) {
-            UniverseController.invalidCommand(event);
-            return;
+            page = 0;
         }
 
         List<Item> items = itemRepository.findAll();
-        pageNumber = Long.min(pageNumber - 1, (items.size() - 1) / 10);
+        int maxPages = (int) Math.ceil(items.size() / 10.0);
+        page = Math.max(0, Math.min(page, maxPages - 1));
+
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("📋 Items List");
         embed.setColor(Color.BLUE);
 
-        StringBuilder itemListText = new StringBuilder();
-        for (int i = (int) pageNumber * 10; i < Long.min((pageNumber + 1) * 10, items.size()); i++) {
+        StringBuilder itemsList = new StringBuilder();
+        for(int i = (int) page * 10; i < Math.min((page + 1) * 10, items.size()); i++) {
             Item item = items.get(i);
-            itemListText.append("`[").append(item.getId()).append("]` **").append(item.getName()).append("**\n");
+            itemsList.append("`").append(item.getId()).append("` |> **").append(item.getName()).append("**\n");
         }
 
-        embed.setDescription(itemListText.toString());
-        embed.setFooter("Page " + (pageNumber + 1) + " / " + ((items.size() + 9) / 10));
+        embed.setDescription(itemsList.toString());
+        embed.setFooter("Page " + (page + 1) + "/" + maxPages);
 
-        event.getChannel().sendMessageEmbeds(embed.build()).queue();
+        Message message = event.getChannel().sendMessageEmbeds(embed.build()).complete();
+        message.addReaction(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("⬅️")).queue();
+        message.addReaction(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("➡️")).queue();
+
+        reactionHandler.registerPaginationMessage(message.getIdLong(), items, (int)page);
     }
 
     public void addRecipe(String command, MessageReceivedEvent event) {

@@ -171,28 +171,29 @@ public class ItemController {
     }
 
     public void items(String command, MessageReceivedEvent event) {
-        long page;
+        long pageNumber;
         try {
-            page = Long.parseLong(command);
+            pageNumber = Long.parseLong(command);
         } catch (Exception ignored) {
             UniverseController.invalidCommand(event);
             return;
         }
-        List<Item> planets = itemRepository.findAll();
-        page = Long.min(page - 1, (planets.size() - 1) / 10);
+
+        List<Item> items = itemRepository.findAll();
+        pageNumber = Long.min(pageNumber - 1, (items.size() - 1) / 10);
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("📋 Items List");
         embed.setColor(Color.BLUE);
 
-        StringBuilder itemsList = new StringBuilder();
-        for(int i = (int) page * 10; i < Long.min((page + 1) * 10, planets.size()); i++) {
-            Item item = planets.get(i);
-            itemsList.append("`").append(item.getId()).append("` |> **").append(item.getName()).append("**\n");
+        StringBuilder itemListText = new StringBuilder();
+        for (int i = (int) pageNumber * 10; i < Long.min((pageNumber + 1) * 10, items.size()); i++) {
+            Item item = items.get(i);
+            itemListText.append("`[").append(item.getId()).append("]` **").append(item.getName()).append("**\n");
         }
 
-        embed.setDescription(itemsList.toString());
-        embed.setFooter("Page " + (page + 1));
+        embed.setDescription(itemListText.toString());
+        embed.setFooter("Page " + (pageNumber + 1) + " / " + ((items.size() + 9) / 10));
 
         event.getChannel().sendMessageEmbeds(embed.build()).queue();
     }

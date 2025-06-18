@@ -184,8 +184,6 @@ public class PlayerController {
             itemRelation.setPlayer(player);
             itemRelation.setItem(item);
             itemRelation.setId(new ItemRelation.ItemRelationId(player.getId(), item.getId()));
-            System.out.println(itemRelation.getAmount());
-            System.out.println(player.getId() + " " + item.getName());
             itemRelation.setAmount(new BigInteger(number).add
                     (new BigInteger(itemRelation.getAmount())).toString());
         }

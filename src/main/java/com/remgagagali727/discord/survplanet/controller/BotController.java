@@ -40,6 +40,9 @@ public class BotController {
             case "help":
                 help(event);
                 return;
+            case "equip":
+                playerController.equip("", event);
+                return;
             case "cas":
             case "casino":
                 universeController.casino("cas", event);
@@ -62,6 +65,8 @@ public class BotController {
                 return;
             case "craft":
                 playerController.craft("", event);
+            case "crafts":
+                universeController.crafts("1", event);
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("plan ")) planetController.addPlanet(command.substring(5), event);
@@ -87,16 +92,7 @@ public class BotController {
         if(command.startsWith("equip ")) playerController.equip(command.substring(6), event);
         if(command.startsWith("eat ")) foodController.eat(command, event);
         if(command.startsWith("craft ")) playerController.craft(command.substring(6), event);
-    }
-
-    private void goHelp(MessageReceivedEvent event) {
-        String helpMessage = """
-                In order to use the go you need to put the planet id or the planet name
-                ie.
-                s!go 1
-                s!go earth
-                """;
-        help(helpMessage, event);
+        if(command.startsWith("crafts ")) universeController.crafts(command.substring(7), event);
     }
 
     private void help(MessageReceivedEvent event) {

@@ -88,7 +88,7 @@ public class PlayerController {
         Player player = getPlayer(event.getAuthor().getIdLong());
         List<ItemRelation> inventory = player.getInventory();
         page = Long.min(page - 1, (inventory.size() - 1) / 5);
-        StringBuilder mes = new StringBuilder("**Inventory of " + event.getAuthor().getEffectiveName() + "**\n");
+        StringBuilder mes = new StringBuilder("# **Inventory of " + event.getAuthor().getEffectiveName() + "**\n");
         for(int i = (int) page * 5;i < Long.min((page + 1) * 5, inventory.size());i++) {
             Item item = inventory.get(Math.toIntExact(i)).getItem();
             String items = "`[" + item.getId() + "]` **" + item.getName() + "**\n\t**Description:** " + item.getDescription() + "\n\t**Quantity:** `" + inventory.get(i).getAmount() + "`\n";
@@ -101,15 +101,23 @@ public class PlayerController {
     @Transactional
     public void equip(String command, MessageReceivedEvent event) {
         Player player = getPlayer(event.getAuthor().getIdLong());
-        Long iid = Long.parseLong(command);
+        Item item;
+
+        try {
+            item = itemRepository.findByNameIgnoreCase(command).get();
+        } catch (Exception e) {
+            try {
+                item = itemRepository.findById(Long.parseLong(command)).get();
+            } catch (Exception ee) {
+                itemDoesNotExist(event);
+                return;
+            }
+        }
+
+        Long iid = item.getId();
+
         StringBuilder sb = new StringBuilder();
 
-        Optional<Item> optionalItem = itemRepository.findById(iid);
-        if(optionalItem.isEmpty()) {
-            event.getChannel().sendMessage("Item with id " + iid + " does not exist").queue();
-            return;
-        }
-        Item item = optionalItem.get();
         Optional<ItemRelation> itemRelation = itemRelationRepository.findByPlayerAndItem(player, item);
 
         if(itemRelation.isEmpty()) {
@@ -120,28 +128,51 @@ public class PlayerController {
         Optional<Drill> optionalDrill = drillRepository.findById(iid);
         if (optionalDrill.isPresent()) {
             player.setDrill(optionalDrill.get());
-            sb.append("You successfully equipped a ").append(item.getName()).append(" as a drill \n");
+            sb.append(item.getName()).append(" as a drill \n");
         }
 
         Optional<Rod> optionalRod = rodRepository.findById(iid);
         if (optionalRod.isPresent()) {
-            sb.append("You successfully equipped a ").append(item.getName()).append(" as a rod \n");
+            sb.append(item.getName()).append(" as a rod \n");
             player.setRod(optionalRod.get());
         }
 
         Optional<Weapon> optionalWeapon = weaponRepository.findById(iid);
         if (optionalWeapon.isPresent()) {
-            sb.append("You successfully equipped a ").append(item.getName()).append(" as a weapon \n");
+            sb.append(item.getName()).append(" as a weapon \n");
             player.setWeapon(optionalWeapon.get());
         }
 
         Optional<Spaceship> optionalSpaceship = spaceshipRepository.findById(iid);
         if (optionalSpaceship.isPresent()) {
-            sb.append("You successfully equipped a ").append(item.getName()).append(" as a spaceship \n");
+            sb.append(item.getName()).append(" as a spaceship \n");
             player.setSpaceship(optionalSpaceship.get());
         }
-        event.getChannel().sendMessage(sb.toString()).queue();
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        if(sb.isEmpty()) {
+            embedBuilder.setTitle("Couldn't equip the item " + item.getName());
+            embedBuilder.setColor(Color.BLUE);
+        } else {
+            embedBuilder.setTitle("Successfully equipped: ");
+            embedBuilder.setColor(Color.PINK);
+            embedBuilder.setDescription(sb.toString());
+        }
+        embedBuilder.setFooter("Survival Universal Bot");
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
         playerRepository.save(player);
+    }
+
+    private void itemDoesNotExist(MessageReceivedEvent event) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle("Oh no!!!")
+                .setDescription("This is an invalid item, try using the ID or the Name of the item")
+                .setFooter("Survival Universe Bot")
+                .setColor(Color.RED);
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
     @Transactional
@@ -193,14 +224,12 @@ public class PlayerController {
 
     @Transactional
     public void craft(String command, MessageReceivedEvent event) {
-        event.getChannel().sendMessage("Trying to craft").queue();
 
         if (command.isEmpty()) {
             showHelpCraftEmbed(event);
             return;
         }
 
-        String itemName = command;
         Long userId = event.getAuthor().getIdLong();
 
         Player player = getPlayer(userId);
@@ -246,7 +275,16 @@ public class PlayerController {
         addToInventory(item, "1", event);
 
         savePlayer(player);
-        event.getChannel().sendMessage("Successfully crafted").queue();
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle(":tools:  Crafting Complete");
+        embedBuilder.setDescription("You have successfully crafted: " + item.getName() + "\n\n" +
+                item.getName() + " has been added to your inventory.");
+        embedBuilder.setColor(Color.decode("#4CAF50"));
+        embedBuilder.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDdyNW5yYWh5eHBud3NxYWxzcDU2dGRzZzFoa2t4MDJ4cGYwMnFzZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NpILbqtmLO1Qkfvc4f/giphy.gif");
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
     private void craftRecipe(List<Crafting> craftings, Item item, MessageReceivedEvent event) {

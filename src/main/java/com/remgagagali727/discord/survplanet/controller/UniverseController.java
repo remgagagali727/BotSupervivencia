@@ -1,8 +1,7 @@
 package com.remgagagali727.discord.survplanet.controller;
 
-import com.remgagagali727.discord.survplanet.entity.Location;
-import com.remgagagali727.discord.survplanet.entity.Planet;
-import com.remgagagali727.discord.survplanet.entity.Player;
+import com.remgagagali727.discord.survplanet.entity.*;
+import com.remgagagali727.discord.survplanet.repository.CraftingRepository;
 import com.remgagagali727.discord.survplanet.repository.LocationRepository;
 import com.remgagagali727.discord.survplanet.repository.PlanetRepository;
 import jakarta.transaction.Transactional;
@@ -17,7 +16,9 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Optional;
+import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
 
 @Controller
 public class UniverseController{
@@ -28,6 +29,8 @@ public class UniverseController{
     private PlayerController playerController;
     @Autowired
     private PlanetRepository planetRepository;
+    @Autowired
+    private CraftingRepository craftingRepository;
     @Autowired
     private LocationRepository locationRepository;
 
@@ -61,16 +64,22 @@ public class UniverseController{
         } else {
             embedBuilder.setAuthor(event.getAuthor().getEffectiveName() + " just bet " + betCoins);
             Boolean won = probabilityCasino();
-            playerCoins = playerCoins.add(betCoins.negate());
             if(won) {
-                embedBuilder.setColor(Color.GREEN);
-                betCoins = betCoins.multiply(new BigInteger("2"));
-                embedBuilder.setDescription("And won " + betCoins + " :D");
                 playerCoins = playerCoins.add(betCoins);
-                embedBuilder.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzN3aXF6azc2d3I1ZTJwMDN6bHhpMjI1bjVzaDhweXVqNHlmZWVwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gULnb1XcI8iC3a8jAp/giphy.gif");
+                embedBuilder.setTitle(":slot_machine: Casino Result — WIN");
+                embedBuilder.setColor(Color.GREEN);
+                embedBuilder.setDescription("Congratulations, " + event.getAuthor().getEffectiveName() + "!\n" +
+                        "You won the bet and earned +" + betCoins + " coins :coin:!\n\n" +
+                        "Your new balance is: " + playerCoins + " coins :coin:.\n" +
+                        "Feeling lucky? Try again!");
             } else {
-                embedBuilder.setDescription("And lost all the money :(");
+                playerCoins = playerCoins.add(betCoins.negate());
+                embedBuilder.setTitle(":slot_machine: Casino Result — LOSS");
                 embedBuilder.setColor(Color.RED);
+                embedBuilder.setDescription("Bad luck, " + event.getAuthor().getEffectiveName() + "!\n" +
+                        "You won the bet and lost -" + betCoins + " coins :coin:!\n\n" +
+                        "Your new balance is: " + playerCoins + " coins :coin:.\n" +
+                        "Maybe next time luck will be on your side.");
             }
             player.setCoins(playerCoins.toString());
             playerController.savePlayer(player);
@@ -224,5 +233,51 @@ public class UniverseController{
 
     private boolean inCooldown() {
         return Math.random() * 2 < 1;
+    }
+
+    public void crafts(String command, MessageReceivedEvent event) {
+        long page;
+        try {
+            page = Long.parseLong(command);
+        } catch (Exception ignored) {
+            UniverseController.invalidCommand(event);
+            return;
+        }
+        List<Crafting> craftings = craftingRepository.findAll();
+        craftings.sort(Comparator.comparing(o -> o.getItem().getId()));
+        ArrayList<ArrayList<Entry<Item, String>>> lists = new ArrayList<>();
+        ArrayList<Entry<Item, String>> list = new ArrayList<>();
+        list.add(new AbstractMap.SimpleEntry<>(craftings.getFirst().getItem(), craftings.getFirst().getAmount()));
+        lists.add(list);
+        Long curr = craftings.getFirst().getItem().getId();
+        for(Crafting crafting : craftings) {
+            System.out.println(crafting.getItem().getName() + " " + crafting.getRequired().getName() + " " + crafting.getAmount());
+            if(((long) crafting.getItem().getId()) == (curr)) {
+                list.add(new AbstractMap.SimpleEntry<>(crafting.getRequired(), crafting.getAmount()));
+            } else {
+                list = new ArrayList<>();
+                list.add(new AbstractMap.SimpleEntry<>(crafting.getItem(), crafting.getAmount()));
+                list.add(new AbstractMap.SimpleEntry<>(crafting.getRequired(), crafting.getAmount()));
+                lists.add(list);
+                curr = crafting.getItem().getId();
+            }
+        }
+        page = Long.min(page - 1, (lists.size() - 1) / 2);
+        StringBuilder mes = new StringBuilder("# **Crafteable Items**\n");
+        for(int i = (int) page * 2;i < Long.min((page + 1) * 2, lists.size());i++) {
+            List<Entry<Item, String>> items = lists.get(i);
+            Item toCraft = items.getFirst().getKey();
+            items.removeFirst();
+            mes.append("\n`[").append(toCraft.getId()).append("]` **").append(toCraft.getName()).append("**\t");
+            mes.append("Coins needed :coin: " + toCraft.getCrafting_price() + "\n\t");
+            for(Entry<Item, String> entry : items) {
+                toCraft = entry.getKey();
+                String am = entry.getValue();
+                mes.append("`[").append(toCraft.getId()).append("]` **").append(toCraft.getName()).append("**\n\t");
+                mes.append("Amount: **").append(am).append("**\n\t");
+            }
+        }
+        mes.append("\nPage ").append(page + 1).append(" / ").append(((lists.size() + 1) / 2));
+        event.getChannel().sendMessage(mes.toString()).queue();
     }
 }

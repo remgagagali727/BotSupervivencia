@@ -291,7 +291,7 @@ public class PlanetController{
         }
         List<Planet> planets = planetRepository.findAll();
         page = Long.min(page - 1, (planets.size() - 1) / 8);
-        StringBuilder mes = new StringBuilder("**Planets**\n");
+        StringBuilder mes = new StringBuilder("# **Planets**\n");
         planets.sort(Comparator.comparing(p -> new BigInteger(p.getToughness())));
         for(int i = (int) page * 8;i < Long.min((page + 1) * 8, planets.size());i++) {
             Planet item = planets.get(i);

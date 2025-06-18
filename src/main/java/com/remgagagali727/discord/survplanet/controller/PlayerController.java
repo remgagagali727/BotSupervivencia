@@ -251,7 +251,24 @@ public class PlayerController {
     }
 
     private void craftRecipe(List<Crafting> craftings, Item item, MessageReceivedEvent event) {
-        event.getChannel().sendMessage("In orde... bla bla bla").queue();
+        Player player = getPlayer(event.getAuthor().getIdLong());
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+                .setColor(Color.BLUE)
+                .setTitle("Oh no you can't craft this you will need")
+                .addField("Coins :coin:", player.getCoins() + "\\" + item.getCrafting_price(), true)
+                .setFooter("Space Survival Bot", null);
+
+        for(Crafting crafting : craftings) {
+            embedBuilder.addField(crafting.getRequired().getName(), has(crafting.getRequired(), player) + "\\" + crafting.getAmount(), true);
+        }
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    private String has(Item item, Player player) {
+        Optional<ItemRelation> oItemRelation = itemRelationRepository.findByPlayerAndItem(player, item);
+        if(oItemRelation.isEmpty()) return "0";
+        else return oItemRelation.get().getAmount();
     }
 
     private boolean has(Item i, String amount, Player player) {
@@ -259,7 +276,7 @@ public class PlayerController {
         if(optional.isEmpty()) return false;
         BigInteger am = new BigInteger(amount);
         BigInteger have = new BigInteger(optional.get().getAmount());
-        return am.compareTo(have) > 0;
+        return am.compareTo(have) <= 0;
     }
 
     private void showHelpCraftEmbed(MessageReceivedEvent event) {

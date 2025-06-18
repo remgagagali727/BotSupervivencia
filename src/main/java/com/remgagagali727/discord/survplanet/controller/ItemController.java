@@ -16,6 +16,8 @@ public class ItemController {
     @Autowired
     SpaceshipRepository spaceshipRepository;
     @Autowired
+    CraftingRepository craftingRepository;
+    @Autowired
     WeaponRepository weaponRepository;
     @Autowired
     ItemRepository itemRepository;
@@ -165,5 +167,30 @@ public class ItemController {
         }
         mes.append("Page ").append(page + 1);
         event.getChannel().sendMessage(mes.toString()).queue();
+    }
+
+    public void addRecipe(String command, MessageReceivedEvent event) {
+        try {
+            String[] s = command.split(", ");
+            Long id1 = Long.parseLong(s[0]);
+            Long id2 = Long.parseLong(s[1]);
+            new BigInteger(s[2]);
+
+            Crafting crafting = new Crafting();
+            Item i1 = itemRepository.findById(id1).get();
+            Item i2 = itemRepository.findById(id2).get();
+            crafting.setItem(i1);
+            crafting.setRequired(i2);
+            crafting.setAmount(s[2]);
+            crafting.setId(new Crafting.CraftingId(i1.getId(), i2.getId()));
+
+            craftingRepository.save(crafting);
+            event.getChannel().sendMessage("You added a new recipe").queue();
+        } catch (Exception e) {
+            System.err.println("Error en getFood: " + e.getMessage());
+            e.printStackTrace();
+
+            event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
+        }
     }
 }

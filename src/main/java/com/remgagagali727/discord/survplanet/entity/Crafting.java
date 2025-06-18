@@ -1,51 +1,39 @@
 package com.remgagagali727.discord.survplanet.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
-@IdClass(Crafting.CraftingId.class)
 public class Crafting {
-    @Id
+
+    @EmbeddedId
+    private CraftingId id;
+
+    @MapsId("item")
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @Id
+    @MapsId("required")
     @ManyToOne
     @JoinColumn(name = "required_id")
     private Item required;
 
     private String amount;
 
-    public class CraftingId implements Serializable {
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class CraftingId implements Serializable {
         private Long item;
         private Long required;
-
-        public CraftingId() {}
-
-        public CraftingId(Long item, Long required) {
-            this.item = item;
-            this.required = required;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof CraftingId that)) return false;
-            return Objects.equals(item, that.item) &&
-                    Objects.equals(required, that.required);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(item, required);
-        }
     }
 }
+

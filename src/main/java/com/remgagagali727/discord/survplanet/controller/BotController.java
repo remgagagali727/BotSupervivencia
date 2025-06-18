@@ -72,6 +72,7 @@ public class BotController {
             if(command.startsWith("spa ")) itemController.addSpaceship(command.substring(4), event);
             if(command.equals("getfood")) foodController.getFood(command, event);
             if(command.startsWith("food ")) foodController.addFood(command.substring(5), event);
+            if(command.startsWith("recipe ")) itemController.addRecipe(command.substring(7), event);
         }
         if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
         if(command.startsWith("items ")) itemController.items(command.substring(6), event);

@@ -18,5 +18,5 @@ public class Locations {
     private String name;
     private LocalDateTime next;
     @OneToOne
-    private Planet location;
+    private Planet planet;
 }

@@ -64,7 +64,7 @@ public class BotController {
                 playerController.craft("", event);
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
-            if(command.startsWith("alex ")) planetController.addPlanet(command.substring(5), event);
+            if(command.startsWith("plan ")) planetController.addPlanet(command.substring(5), event);
             if(command.startsWith("item ")) itemController.addItem(command.substring(5), event);
             if(command.startsWith("drill ")) itemController.addDrill(command.substring(6), event);
             if(command.startsWith("rod ")) itemController.addRod(command.substring(4), event);
@@ -73,6 +73,8 @@ public class BotController {
             if(command.equals("getfood")) foodController.getFood(command, event);
             if(command.startsWith("food ")) foodController.addFood(command.substring(5), event);
             if(command.startsWith("recipe ")) itemController.addRecipe(command.substring(7), event);
+            if(command.startsWith("cprice ")) itemController.setCraftingPrice(command.substring(7), event);
+            if(command.startsWith("sprice ")) itemController.setSellPrice(command.substring(7), event);
         }
         if(command.startsWith("cas ") || command.startsWith("casino ")) universeController.casino(command, event);
         if(command.startsWith("items ")) itemController.items(command.substring(6), event);
@@ -138,7 +140,6 @@ public class BotController {
         String command;
         try {
             command = event.getMessage().getContentRaw();
-            if(!command.startsWith("s!")) return;
             command = command.substring(2);
         } catch (Exception e) {
             command = "";

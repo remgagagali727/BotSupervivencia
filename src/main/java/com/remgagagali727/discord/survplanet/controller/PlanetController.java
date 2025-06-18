@@ -75,7 +75,6 @@ public class PlanetController{
             }
             BigInteger health = new BigInteger(player.getHealth());
             health = health.add(damage.negate());
-            player.setHealth(health.toString());
             BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getDrill().getToughness()));
             LocalDateTime newMine = LocalDateTime.now().plusMinutes(extraMinutes.intValueExact());
             List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(MINE));
@@ -105,6 +104,7 @@ public class PlanetController{
             }
             message.addField("Lost hearts :broken_heart:", damage.toString(), true);
             player.setN_mine(newMine);
+            player.setHealth(health.toString());
             player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
             playerController.savePlayer(player);
             message.setColor(Color.YELLOW);
@@ -149,9 +149,12 @@ public class PlanetController{
     }
 
     public void addPlanet(String command, MessageReceivedEvent event) {
-        String[] s = command.split(" ");
+        String[] s = command.split(", ");
         Planet planet = new Planet();
         planet.setName(s[0]);
+        new BigInteger(s[1]);
+        new BigInteger(s[2]);
+        new BigInteger(s[3]);
         planet.setX(s[1]);
         planet.setY(s[2]);
         planet.setToughness(s[3]);

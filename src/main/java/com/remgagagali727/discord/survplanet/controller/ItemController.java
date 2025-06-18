@@ -193,4 +193,42 @@ public class ItemController {
             event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
         }
     }
+
+    @Transactional
+    public void setCraftingPrice(String command, MessageReceivedEvent event) {
+        try {
+            String[] s = command.split(", ");
+            Long id1 = Long.parseLong(s[0]);
+            new BigInteger(s[1]);
+
+            Item i1 = itemRepository.findById(id1).get();
+            i1.setCrafting_price(s[1]);
+
+            itemRepository.save(i1);
+            event.getChannel().sendMessage("You changed the crafting price of an item").queue();
+        } catch (Exception e) {
+            System.err.println("Error en getFood: " + e.getMessage());
+            e.printStackTrace();
+
+            event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
+        }
+    }
+
+    public void setSellPrice(String command, MessageReceivedEvent event) {
+        try {
+            String[] s = command.split(", ");
+            Long id1 = Long.parseLong(s[0]);
+            new BigInteger(s[1]);
+
+            Item i1 = itemRepository.findById(id1).get();
+            i1.setSell_price(s[1]);
+
+            itemRepository.save(i1);
+            event.getChannel().sendMessage("You changed the crafting price of an item").queue();
+        } catch (Exception e) {
+            System.err.println("Error en getFood: " + e.getMessage());
+            e.printStackTrace();
+            event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
+        }
+    }
 }

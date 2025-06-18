@@ -143,6 +143,9 @@ public class PlanetController{
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
+    private boolean huntCooldown(Player player) {
+        return player.getN_fish().isAfter(LocalDateTime.now());
+    }
 
     private boolean inCooldown() {
         return Math.random() * 2 < 1;

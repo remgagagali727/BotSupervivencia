@@ -174,7 +174,7 @@ public class PlanetController{
                 itemre.save(nir);
             }
             message.addField("Lost hearts :broken_heart:", damage.toString(), true);
-            player.setN_mine(newMine);
+            player.setN_fish(newMine);
             player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
             playerController.savePlayer(player);
             message.setColor(Color.CYAN);
@@ -249,7 +249,7 @@ public class PlanetController{
                 itemre.save(nir);
             }
             message.addField("Lost hearts :broken_heart:", damage.toString(), true);
-            player.setN_mine(newMine);
+            player.setN_hunt(newMine);
             player.setCoins(extraCoins.add(new BigInteger(player.getCoins())).toString());
             playerController.savePlayer(player);
             message.setColor(Color.RED);

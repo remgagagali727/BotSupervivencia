@@ -137,7 +137,7 @@ public class PlanetController{
             message.addField("Cooldown", "you can fish <t:" + timeStamp + ":R> try later :p", false);
         } else {
             Planet planet = player.getPlanet();
-            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getDrill().getToughness()));
+            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getRod().getToughness()));
             int got = (int)(Math.random() * 3 + 1);
             BigInteger bgot = new BigInteger(String.valueOf(got));
             if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
@@ -185,7 +185,7 @@ public class PlanetController{
             playerController.savePlayer(player);
             message.setColor(Color.YELLOW);
             message.setAuthor(event.getAuthor().getEffectiveName() + " just fished at planet " + player.getPlanet().getName() + " and got...");
-            message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWttOTZ6dHNhZjQycXI3ZzR5ZzBndDV5bWdiZW1rZXJjNGNvYng3aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KbCaO3y2yH5qo/giphy.gif");
+            message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2RybmEweXIwcXUwY2djZnE5djlxNHZ6Y2Q4OTU3NTFyejdwcW42YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/G5tA3ZSgiBiIo/giphy.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }
@@ -212,7 +212,7 @@ public class PlanetController{
             message.addField("Cooldown", "you can hunt <t:" + timeStamp + ":R> try later :p", false);
         } else {
             Planet planet = player.getPlanet();
-            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getDrill().getToughness()));
+            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getWeapon().getToughness()));
             int got = (int)(Math.random() * 3 + 1);
             BigInteger bgot = new BigInteger(String.valueOf(got));
             if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
@@ -227,9 +227,9 @@ public class PlanetController{
             BigInteger health = new BigInteger(player.getHealth());
             health = health.add(damage.negate());
             player.setHealth(health.toString());
-            BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getRod().getToughness()));
+            BigInteger extraCoins = new BigInteger(planet.getToughness()).multiply(new BigInteger(player.getWeapon().getToughness()));
             LocalDateTime newMine = LocalDateTime.now().plusMinutes(extraMinutes.intValueExact());
-            List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(FISH));
+            List<Loot> loots = lootRepository.findByPlanetAndType(planet, typeRepository.getReferenceById(HUNT));
             message.addField("Coins :coin:", extraCoins.toString(), true);
             for(Loot loot : loots) {
                 got = (int)(Math.random() * 3 + 1);
@@ -260,7 +260,7 @@ public class PlanetController{
             playerController.savePlayer(player);
             message.setColor(Color.YELLOW);
             message.setAuthor(event.getAuthor().getEffectiveName() + " just hunted at planet " + player.getPlanet().getName() + " and got...");
-            message.setImage("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWttOTZ6dHNhZjQycXI3ZzR5ZzBndDV5bWdiZW1rZXJjNGNvYng3aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KbCaO3y2yH5qo/giphy.gif");
+            message.setImage("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDBjaGg4NWRyZjc1aXQ2eDl0bDRzaHoyeWFkc240dXYzN3A2NWtubCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FDFi1PMVdrMbivlfhf/giphy.gif");
         }
         event.getChannel().sendMessageEmbeds(message.build()).queue();
     }

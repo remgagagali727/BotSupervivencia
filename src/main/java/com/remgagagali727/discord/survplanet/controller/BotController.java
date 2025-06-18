@@ -118,6 +118,11 @@ public class BotController {
                 go (planet) -> This command allows you to get to another planet if and only if you are in a planet that is no that planet
                 i (page) -> This command allows you to see you inventory
                 inventory (page) -> Same as i
+                planets (page) -> This command allows you to see the planets available
+                items (page) -> This command allows you to see the items available
+                eat (food) -> This command allows you to eat food, if you are on a planet
+                craft (recipe) -> This command allows you to craft items, if you are on a planet
+                equip (item) -> This command allows you to equip an item, if you are on a planet
                 """;
         help(helpMessage, event);
     }

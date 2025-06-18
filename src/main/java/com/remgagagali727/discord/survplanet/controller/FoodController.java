@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 @Controller
 public class FoodController {
@@ -152,7 +153,9 @@ public class FoodController {
 
     @Transactional
     public void addFood(String command, MessageReceivedEvent event) {
-        String[] s = command.split(", ");
+        String[] s = Arrays.stream(command.split(", "))
+                .map(String::trim)
+                .toArray(String[]::new);
         try {
             Long iid = Long.parseLong(s[0]);
             Item item = itemRepository.findById(iid)

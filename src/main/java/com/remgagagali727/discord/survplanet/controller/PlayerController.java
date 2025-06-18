@@ -84,6 +84,7 @@ public class PlayerController {
             UniverseController.invalidCommand(event);
             return;
         }
+
         Player player = getPlayer(event.getAuthor().getIdLong());
         List<ItemRelation> inventory = player.getInventory();
         page = Long.min(page - 1, (inventory.size() - 1) / 5);

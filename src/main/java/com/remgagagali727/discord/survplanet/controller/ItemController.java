@@ -6,8 +6,11 @@ import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import net.dv8tion.jda.api.EmbedBuilder;
+import java.awt.*;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -34,7 +37,10 @@ public class ItemController {
 
     public void addItem(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Item i = new Item();
             i.setName(s[0]);
             i.setDescription(s[1]);
@@ -52,7 +58,10 @@ public class ItemController {
     @Transactional
     public void addDrill(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Drill i = new Drill();
             Long id = Long.parseLong(s[0]);
             Item it = itemRepository.findById(id).get();
@@ -70,7 +79,10 @@ public class ItemController {
     @Transactional
     public void addRod(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Rod i = new Rod();
             Long id = Long.parseLong(s[0]);
             Item it = itemRepository.findById(id).get();
@@ -88,7 +100,10 @@ public class ItemController {
     @Transactional
     public void addWeapon(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Weapon i = new Weapon();
             Long id = Long.parseLong(s[0]);
             Item it = itemRepository.findById(id).get();
@@ -106,7 +121,10 @@ public class ItemController {
     @Transactional
     public void addSpaceship(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Spaceship i = new Spaceship();
             Long id = Long.parseLong(s[0]);
             Item it = itemRepository.findById(id).get();
@@ -124,7 +142,10 @@ public class ItemController {
     @Transactional
     public void addLoot(String command, MessageReceivedEvent event) {
         try{
-            String s[] = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
 
             Long pid = Long.parseLong(s[0]);
             Long iid = Long.parseLong(s[1]);
@@ -159,19 +180,29 @@ public class ItemController {
         }
         List<Item> planets = itemRepository.findAll();
         page = Long.min(page - 1, (planets.size() - 1) / 10);
-        StringBuilder mes = new StringBuilder("**Items**\n");
-        for(int i = (int) page * 10;i < Long.min((page + 1) * 10, planets.size());i++) {
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("📋 Items List");
+        embed.setColor(Color.BLUE);
+
+        StringBuilder itemsList = new StringBuilder();
+        for(int i = (int) page * 10; i < Long.min((page + 1) * 10, planets.size()); i++) {
             Item item = planets.get(i);
-            String items = "(" + item.getId() + ") " + item.getName() + "\n";
-            mes.append(items);
+            itemsList.append("`").append(item.getId()).append("` |> **").append(item.getName()).append("**\n");
         }
-        mes.append("Page ").append(page + 1);
-        event.getChannel().sendMessage(mes.toString()).queue();
+
+        embed.setDescription(itemsList.toString());
+        embed.setFooter("Page " + (page + 1));
+
+        event.getChannel().sendMessageEmbeds(embed.build()).queue();
     }
 
     public void addRecipe(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Long id1 = Long.parseLong(s[0]);
             Long id2 = Long.parseLong(s[1]);
             new BigInteger(s[2]);
@@ -197,7 +228,10 @@ public class ItemController {
     @Transactional
     public void setCraftingPrice(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Long id1 = Long.parseLong(s[0]);
             new BigInteger(s[1]);
 
@@ -216,7 +250,10 @@ public class ItemController {
 
     public void setSellPrice(String command, MessageReceivedEvent event) {
         try {
-            String[] s = command.split(", ");
+            //String[] s = command.split(", ");
+            String[] s = Arrays.stream(command.split(", "))
+                    .map(String::trim)
+                    .toArray(String[]::new);
             Long id1 = Long.parseLong(s[0]);
             new BigInteger(s[1]);
 

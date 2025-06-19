@@ -65,8 +65,12 @@ public class BotController {
                 return;
             case "craft":
                 playerController.craft("", event);
+                return;
             case "crafts":
                 universeController.crafts("1", event);
+                return;
+            case "sell":
+                playerController.sell("", event);
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("plan ")) planetController.addPlanet(command.substring(5), event);
@@ -93,32 +97,41 @@ public class BotController {
         if(command.startsWith("eat ")) foodController.eat(command, event);
         if(command.startsWith("craft ")) playerController.craft(command.substring(6), event);
         if(command.startsWith("crafts ")) universeController.crafts(command.substring(7), event);
+        if(command.startsWith("sell ")) playerController.sell(command.substring(5), event);
     }
 
     private void help(MessageReceivedEvent event) {
         String helpMessage = """
-                **Use s!(command) to execute a command**
-                Commands available
-                
-                profile -> This command lets you know your profile information
-                p -> Same as profile
-                mine -> This commands lets you mine in the planet you are currently on
-                m -> Same as mine
-                fish -> This commands lets you fish in the planet you are currently on
-                f -> Same as fish
-                hunt -> This commands lets you hunt in the planet you are currently on
-                h -> Same as hunt
-                help -> This command shows this menu
-                casino (number) -> This command lets you bet your coins if you are currently in the planet the casino is on, else this command will show you where the casino is
-                cas (number) -> Same as casino
-                go (planet) -> This command allows you to get to another planet if and only if you are in a planet that is no that planet
-                i (page) -> This command allows you to see you inventory
-                inventory (page) -> Same as i
-                planets (page) -> This command allows you to see the planets available
-                items (page) -> This command allows you to see the items available
-                eat (food) -> This command allows you to eat food, if you are on a planet
-                craft (recipe) -> This command allows you to craft items, if you are on a planet
-                equip (item) -> This command allows you to equip an item, if you are on a planet
+                📖 **SurvPlanet Command Guide**
+                Use `s!(command)` to execute a command.
+
+                🔹 **Player Information**
+                `profile`, `p` → View your player profile (health, coins, equipped items, etc.)
+                `inventory (page)`, `i (page)` → View your inventory with pagination
+
+                🔹 **Actions on Your Current Planet**
+                `mine`, `m` → Mine for resources
+                `fish`, `f` → Catch fish
+                `hunt`, `h` → Hunt for materials or food
+                `eat (food)` → Consume food to restore health
+                `craft (recipe)` → Craft items using available materials
+                `equip (item)` → Equip an item (e.g., weapon, drill, fishing rod)
+
+                🔹 **Exploration**
+                `go (planet)` → Travel to a different planet (if not already there)
+                `planets (page)` → View the list of available planets
+
+                🔹 **Economy & Casino**
+                `sell (item) (amount)` → Sell an item for coins (must be on a planet)
+                `casino (number)`, `cas (number)` → Bet your coins at the casino (only works if you're on the casino planet)
+
+                🔹 **General Info**
+                `items (page)` → Browse all available items
+                `help` → Show this help menu
+
+                ℹ️ Do not include parentheses when using commands. Example: `s!mine`, `s!go earth`, or `s!sell fish 5`
+
+                🌌 Explore planets, gather resources, and grow stronger in **SurvPlanet**!
                 """;
         help(helpMessage, event);
     }

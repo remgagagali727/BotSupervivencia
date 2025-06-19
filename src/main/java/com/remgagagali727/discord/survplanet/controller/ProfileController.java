@@ -24,7 +24,7 @@ public class ProfileController{
                 .addField("Equipped Spaceship", player.getSpaceship().getItem().getName(), true);
 
         if(player.isOnPlanet()) {
-            eBuilder.addField("Location :ringed_planet:", player.getPlanet().getName().toUpperCase(), true);
+            eBuilder.addField("Location :ringed_planet:", player.getPlanet().getName(), true);
         } else {
             eBuilder.addField("Location :ringed_planet:", "in Space", true);
         }

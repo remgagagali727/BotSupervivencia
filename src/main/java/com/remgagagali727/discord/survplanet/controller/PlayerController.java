@@ -12,6 +12,7 @@ import java.awt.*;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,7 +186,7 @@ public class PlayerController {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(Color.RED);
         eb.setTitle("Oh no... what a shame " + event.getAuthor().getEffectiveName() + " just died");
-        eb.setDescription("The gods took the death of " + event.getAuthor().getEffectiveName() + " as a tribute and decided to give one coin to <@" + coinPlayer.getId() + ">");
+        eb.setDescription("The gods took the death of " + event.getAuthor().getEffectiveName() + " as a tribute they decided to give one coin to <@" + coinPlayer.getId() + ">");
         eb.setImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSAYD3V5Jx5VpENf0RYKAGW49KzscES0tFIA&s");
         LocalDateTime muerte = LocalDateTime.now().plusHours(2);
         long timeStamp = muerte.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
@@ -337,4 +338,99 @@ public class PlayerController {
         savePlayer(player);
         event.getChannel().sendMessage("Ya listo curado").queue();
     }
+
+    public void sell(String command, MessageReceivedEvent event) {
+        String am = null;
+        Item item = null;
+
+        String[] s = Arrays.stream(command.split(" "))
+                .map(String::trim)
+                .toArray(String[]::new);
+
+        Player player = getPlayer(event.getAuthor().getIdLong());
+
+        //Intenta leer el id
+        try {
+            item = itemRepository.findById(Long.parseLong(s[0])).get();
+            am = "1";
+        } catch (Exception ignored) {
+
+        }
+        //Intenta leer el id con numero al final
+        try {
+            String x = s[1];
+            x = s[0];
+            new BigInteger(s[1]);
+            item = itemRepository.findById(Long.parseLong(s[0])).get();
+            am = s[1];
+        } catch (Exception ignored) {
+
+        }
+        //Intenta leer el nombre
+        try {
+            item = itemRepository.findByNameIgnoreCase(command).get();
+            am = "1";
+        } catch (Exception ignored) {
+
+        }
+        //Intenta leer el nombre con un numero al final
+        try {
+            new BigInteger(s[s.length - 1]);
+            StringBuilder sb = new StringBuilder(s[0]);
+            for(int i = 1;i < s.length - 1;i++) sb.append(" ").append(s[i]);
+            item = itemRepository.findByNameIgnoreCase(sb.toString()).get();
+            am = s[s.length - 1];
+        } catch (Exception ignored) {
+
+        }
+        if(item == null) {
+            itemDoesNotExist(event);
+            return;
+        }
+        //Checar que el jugador tenga ese item en su inventario
+        if(!has(item, am, player)) {
+            playerDoesNotHaveAm(item, event);
+            return;
+        }
+
+        //Checar que el item sea vendible
+        if(item.getSell_price().equals("-1")) {
+            item.notSelleable(event);
+            return;
+        }
+
+        BigInteger gained = new BigInteger(am).multiply(new BigInteger(item.getSell_price()));
+        player.setCoins(new BigInteger(player.getCoins()).add(gained).toString());
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle("💰 Item Sold");
+        embedBuilder.setDescription(String.format(
+                "You successfully sold **%s× %s**!\n" +
+                "Each unit is worth 💸 **%s coins**\n" +
+                "You earned a total of 🪙 **%d coins**.",
+                am,
+                item.getName(),
+                item.getSell_price(),
+                gained
+        ));
+
+        embedBuilder.setColor(Color.decode("#8ACCD5"));
+        embedBuilder.setFooter("Surv Planet");
+
+        addToInventory(item, new BigInteger(am).negate().toString(), event);
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+        savePlayer(player);
+    }
+
+    private void playerDoesNotHaveAm(Item item, MessageReceivedEvent event) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Item Not Found in Inventory");
+        embedBuilder.setDescription("You do not have any of the item: **" + item.getName() + "**");
+        embedBuilder.setColor(Color.RED);
+        embedBuilder.setFooter("Surv Planet");
+
+        event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
 }

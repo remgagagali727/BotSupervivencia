@@ -73,13 +73,23 @@ public class FoodController {
         }
 
         if (foodItem == null) {
-            event.getChannel().sendMessage("No tienes " + foodName + " en tu inventario.").queue();
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle("🍽️ Food Not Found");
+            embed.setDescription("You don't have **" + foodName + "** in your inventory.");
+            embed.setColor(Color.RED);
+            embed.setFooter("Surv Planet");
+            event.getChannel().sendMessageEmbeds(embed.build()).queue();
             return;
         }
 
         Optional<Food> optFood = foodRepository.findById(foodItem.getId());
         if (optFood.isEmpty()) {
-            event.getChannel().sendMessage("¡" + foodName + " no es comestible!").queue();
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle("🚫 Not Edible");
+            embed.setDescription("**" + foodName + "** is not a valid food item.");
+            embed.setColor(Color.ORANGE);
+            embed.setFooter("Surv Planet");
+            event.getChannel().sendMessageEmbeds(embed.build()).queue();
             return;
         }
 

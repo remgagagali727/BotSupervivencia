@@ -15,14 +15,17 @@ import java.awt.*;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ItemController {
 
     @Autowired
-    SpaceshipRepository spaceshipRepository;
-    @Autowired
     CraftingRepository craftingRepository;
+    @Autowired
+    FoodRepository foodRepository;
+    @Autowired
+    SpaceshipRepository spaceshipRepository;
     @Autowired
     WeaponRepository weaponRepository;
     @Autowired
@@ -280,5 +283,135 @@ public class ItemController {
             e.printStackTrace();
             event.getChannel().sendMessage("❌ Ocurrió un error al procesar la solicitud: " + e.getMessage()).queue();
         }
+    }
+
+    public void itemInfo(String command, MessageReceivedEvent event) {
+        Item item = getItem(command);
+        if(item == null) {
+            invalidItem(item, event);
+            return;
+        }
+
+        event.getChannel().sendMessage(
+                formatItemInfo(
+                        item,
+                        drillRepository.findById(item.getId()),
+                        rodRepository.findById(item.getId()),
+                        spaceshipRepository.findById(item.getId()),
+                        weaponRepository.findById(item.getId()),
+                        foodRepository.findById(item.getId()),
+                        lootRepository.findByItem(item),
+                        craftingRepository.findByItem(item)
+                )
+        ).queue();
+    }
+
+    public static void invalidItem(Item item, MessageReceivedEvent event) {
+        EmbedBuilder embed = new EmbedBuilder();
+
+        embed.setTitle("❌ Invalid Item");
+
+        if (item != null) {
+            embed.setDescription("The item **" + item.getName() + "** is not valid for this action.");
+        } else {
+            embed.setDescription("The item you provided is not valid or doesn't exist.");
+        }
+
+        embed.setColor(Color.RED);
+        embed.setFooter("Surv Planet", null);
+
+        event.getChannel().sendMessageEmbeds(embed.build()).queue();
+    }
+
+    public Item getItem(String command) {
+        Optional<Item> item;
+        Long id;
+        try {
+            id = Long.parseLong(command);
+        } catch (Exception ignored) {
+            id = -1L;
+        }
+        item = itemRepository.findByNameIgnoreCase(command);
+        if(item.isPresent()) return item.get();
+        item = itemRepository.findById(id);
+        return item.orElse(null);
+    }
+
+    public String formatItemInfo(Item item,
+                                 Optional<Drill> optionalDrill,
+                                 Optional<Rod> optionalRod,
+                                 Optional<Spaceship> optionalSpaceship,
+                                 Optional<Weapon> optionalWeapon,
+                                 Optional<Food> optionalFood,
+                                 List<Loot> loots,
+                                 List<Crafting> craftings) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("`[").append(item.getId()).append("]` ");
+        sb.append("✨ **").append(item.getName()).append("** ✨\n");
+        sb.append("_").append(item.getDescription()).append("_\n\n");
+
+        if ("-1".equals(item.getSell_price())) {
+            sb.append("❌ **Not sellable**\n");
+        } else {
+            sb.append("💰 **Sell Price:** ").append(item.getSell_price()).append(" coins\n");
+        }
+
+        if ("-1".equals(item.getCrafting_price())) {
+            sb.append("🛠️ **Cannot be crafted**\n");
+        } else {
+            sb.append("🛠️ **Crafting Price:** ").append(item.getCrafting_price()).append(" coins\n");
+        }
+
+        sb.append("🔧 **Types:**");
+        boolean hasType = false;
+        if (optionalDrill.isPresent()) {
+            sb.append(" ⛏️ Drill (Toughness: ").append(optionalDrill.get().getToughness()).append(")");
+            hasType = true;
+        }
+        if (optionalRod.isPresent()) {
+            if (hasType) sb.append(",");
+            sb.append(" 🎣 Fishing Rod (Toughness: ").append(optionalRod.get().getToughness()).append(")");
+            hasType = true;
+        }
+        if (optionalWeapon.isPresent()) {
+            if (hasType) sb.append(",");
+            sb.append(" 🗡️ Weapon (Toughness: ").append(optionalWeapon.get().getToughness()).append(")");
+            hasType = true;
+        }
+        if (optionalSpaceship.isPresent()) {
+            if (hasType) sb.append(",");
+            sb.append(" 🚀 Spaceship (Speed: ").append(optionalSpaceship.get().getSpeed()).append(")");
+            hasType = true;
+        }
+        if (optionalFood.isPresent()) {
+            if (hasType) sb.append(",");
+            sb.append(" 🍖 Food (Heals: ").append(optionalFood.get().getHeal())
+                    .append(", Increases Max Health: ").append(optionalFood.get().getHealth_added()).append(")");
+            hasType = true;
+        }
+        if (!hasType) {
+            sb.append(" 📦 Miscellaneous");
+        }
+        sb.append("\n");
+
+        if (loots != null && !loots.isEmpty()) {
+            sb.append("\n🗺️ **Looted From:**\n");
+            for (Loot loot : loots) {
+                Planet planet = loot.getPlanet();
+                sb.append("- 🪐 ").append(planet.getName())
+                        .append(" (Amount: ").append(loot.getAmount()).append(")\n");
+            }
+        }
+
+        if (craftings != null && !craftings.isEmpty()) {
+            sb.append("\n🧪 **Crafting Recipe:**\n");
+            for (Crafting crafting : craftings) {
+                sb.append("- ").append(crafting.getAmount())
+                        .append(" × ").append(crafting.getRequired().getName()).append("\n");
+            }
+        }
+
+        return sb.toString();
     }
 }

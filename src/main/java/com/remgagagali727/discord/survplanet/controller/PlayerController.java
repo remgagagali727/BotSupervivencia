@@ -37,6 +37,8 @@ public class PlayerController {
     private PlanetRepository planetRepository;
     @Autowired
     private ItemRelationRepository itemRelationRepository;
+    @Autowired
+    private ItemController itemController;
 
     @Transactional
     public Player getPlayer(long idLong) {
@@ -232,16 +234,13 @@ public class PlayerController {
         }
 
         Long userId = event.getAuthor().getIdLong();
-
         Player player = getPlayer(userId);
 
-        Optional<Item> oitem = itemRepository.findByNameIgnoreCase(command);
-        if(oitem.isEmpty()) {
-            event.getChannel().sendMessage("The item does not exist").queue();
+        Item item = itemController.getItem(command);
+        if(item == null) {
+            ItemController.invalidItem(null, event);
             return;
         }
-
-        Item item = oitem.get();
 
         if(item.getCrafting_price().equals("-1")) {
             event.getChannel().sendMessage("This item cannot be crafted").queue();

@@ -73,8 +73,10 @@ public class BotController {
                 playerController.sell("", event);
                 return;
             case "planet":
-                planetController.planetInfo(command.substring(7), event);
+                planetController.planetInfo("", event);
                 return;
+            case "item":
+                itemController.itemInfo("", event);
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("plan ")) planetController.addPlanet(command.substring(5), event);
@@ -103,6 +105,7 @@ public class BotController {
         if(command.startsWith("crafts ")) universeController.crafts(command.substring(7), event);
         if(command.startsWith("sell ")) playerController.sell(command.substring(5), event);
         if(command.startsWith("planet ")) planetController.planetInfo(command.substring(7), event);
+        if(command.startsWith("item ")) itemController.itemInfo(command.substring(5), event);
     }
 
     private void help(MessageReceivedEvent event) {
@@ -124,6 +127,7 @@ public class BotController {
 
                 🔹 **Exploration**
                 `go (planet)` → Travel to a different planet (if not already there)
+                `planet` → View detailed info about your current planet
                 `planets (page)` → View the list of available planets
 
                 🔹 **Economy & Casino**
@@ -132,6 +136,7 @@ public class BotController {
 
                 🔹 **General Info**
                 `items (page)` → Browse all available items
+                `item (item name)` → View detailed information about a specific item
                 `crafts (page)` → View the list of available crafting recipes
                 `help` → Show this help menu
 

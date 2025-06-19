@@ -37,6 +37,8 @@ public class ItemController {
     TypeRepository typeRepository;
     @Autowired
     LootRepository lootRepository;
+    @Autowired
+    private ReactionHandler reactionHandler;
 
     public void addItem(String command, MessageReceivedEvent event) {
         try {

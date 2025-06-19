@@ -62,7 +62,7 @@ public class ReactionHandler extends ListenerAdapter {
         StringBuilder itemsList = new StringBuilder();
         for (int i = page * 10; i < Math.min((page + 1) * 10, items.size()); i++) {
             Item item = items.get(i);
-            itemsList.append("`").append(item.getId()).append("` |> **").append(item.getName()).append("**\n");
+            itemsList.append("`").append(item.getId()).append("` **").append(item.getName()).append("**\n");
         }
 
         embed.setDescription(itemsList.toString());

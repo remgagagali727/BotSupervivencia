@@ -19,9 +19,7 @@ public class Planet{
     private String toughness;
     private String x;
     private String y;
-    @OneToMany
-    private List<Player> players;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Loot> loots;
 
     @Override

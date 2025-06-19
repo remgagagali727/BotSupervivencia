@@ -188,7 +188,7 @@ public class UniverseController{
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("It's time to travel!!!")
                 .setDescription("You will arrive to " + planet.getName() + " " + tiempo)
-                .setFooter("Survival Universe Bot")
+                .setFooter("Surv Planet")
                 .setColor(Color.CYAN);
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
@@ -199,7 +199,7 @@ public class UniverseController{
 
         embedBuilder.setTitle("Oh no!!!")
                 .setDescription("This travel would take more than 2 hours and you don't have enough fuel, try traveling to another planet")
-                .setFooter("Survival Universe Bot")
+                .setFooter("Surv Planet")
                 .setColor(Color.yellow);
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
@@ -210,16 +210,16 @@ public class UniverseController{
 
         embedBuilder.setTitle("You are already in that planet")
                 .setColor(Color.YELLOW)
-                .setFooter("Survival Universe Bot");
+                .setFooter("Surv Planet");
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
-    private void invalidPlanet(MessageReceivedEvent event) {
+    public static void invalidPlanet(MessageReceivedEvent event) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("That's not a planet!!! :ringed_planet:");
         embedBuilder.setColor(Color.MAGENTA);
-        embedBuilder.setFooter("Survival Universe Bot");
+        embedBuilder.setFooter("Surv Planet");
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
@@ -229,10 +229,6 @@ public class UniverseController{
 
     private Boolean probabilityCasino() {
         return Math.random() * 100 < 48;
-    }
-
-    private boolean inCooldown() {
-        return Math.random() * 2 < 1;
     }
 
     public void crafts(String command, MessageReceivedEvent event) {

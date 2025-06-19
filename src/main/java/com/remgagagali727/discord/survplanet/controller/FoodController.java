@@ -118,7 +118,7 @@ public class FoodController {
                 .setDescription("You've eaten " + food.getItem().getName())
                 .addField("Health", oldHealth + " → " + newHealth + " :light_blue_heart:", true)
                 .addField("MaxHealth", oldMaxHealth + " -> " + newMaxHealth + " :light_blue_heart:", true)
-                .setFooter("Space Survival Bot", null);
+                .setFooter("Surv Planet", null);
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }
@@ -130,7 +130,7 @@ public class FoodController {
                 .setDescription("Consume alimentos para restaurar salud.")
                 .addField("Uso", "s!eat <nombre_del_alimento>", false)
                 .addField("Ejemplo", "s!eat space_apple", false)
-                .setFooter("Space Survival Bot", null);
+                .setFooter("Surv Planet", null);
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
     }

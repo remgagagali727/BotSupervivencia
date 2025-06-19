@@ -66,7 +66,7 @@ public class PlanetController{
                 longAction("mine", event);
                 return;
             }
-            BigInteger damage = bgot.multiply(extraMinutes);
+            BigInteger damage = bgot.multiply(new BigInteger(planet.getToughness()).add(new BigInteger(player.getDrill().getToughness()).negate()).max(new BigInteger("0")));
             if(damage.compareTo(new BigInteger(player.getHealth())) >= 0) {
                 playerController.kill(event);
                 return;
@@ -102,7 +102,7 @@ public class PlanetController{
 
         embedBuilder.setTitle("Oh no!!!")
                 .setDescription("To " + text + " here you would need more than 200 minutes you can't do that!!!")
-                .setFooter("Survival Universe Bot")
+                .setFooter("Surv Planet")
                 .setColor(Color.yellow);
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
@@ -142,7 +142,7 @@ public class PlanetController{
                 return;
             }
 
-            BigInteger damage = bgot.multiply(extraMinutes);
+            BigInteger damage = bgot.multiply(new BigInteger(planet.getToughness()).add(new BigInteger(player.getRod().getToughness()).negate()).max(new BigInteger("0")));
             if (damage.compareTo(new BigInteger(player.getHealth())) >= 0) {
                 playerController.kill(event);
                 return;
@@ -213,7 +213,7 @@ public class PlanetController{
                 return;
             }
 
-            BigInteger damage = bgot.multiply(extraMinutes);
+            BigInteger damage = bgot.multiply(new BigInteger(planet.getToughness()).add(new BigInteger(player.getWeapon().getToughness()).negate()).max(new BigInteger("0")));
             if (damage.compareTo(new BigInteger(player.getHealth())) >= 0) {
                 playerController.kill(event);
                 return;
@@ -292,5 +292,52 @@ public class PlanetController{
         }
         mes.append("Page ").append(page + 1).append(" / ").append((planets.size() + 7) / 8);
         event.getChannel().sendMessage(mes.toString()).queue();
+    }
+
+    public void planetInfo(String command, MessageReceivedEvent event) {
+        Long id = -1L;
+        try{
+            id = Long.valueOf(command);
+        } catch (Exception ignored) {
+
+        }
+        Optional<Planet> optionalPlanet = planetRepository.findById(id);
+        Planet planet;
+        if(optionalPlanet.isEmpty()) {
+            optionalPlanet = planetRepository.findByName(command);
+            if(optionalPlanet.isEmpty()) {
+                UniverseController.invalidPlanet(event);
+                return;
+            } else {
+                planet = optionalPlanet.get();
+            }
+        } else {
+            planet = optionalPlanet.get();
+        }
+
+        EmbedBuilder embed = new EmbedBuilder();
+        List<Loot> loots = lootRepository.findByPlanet(planet);
+
+        embed.setTitle("🌍 Planet Info: " + planet.getName());
+        embed.setColor(Color.YELLOW);
+
+        embed.addField("Coordinates", "X: " + planet.getX() + " | Y: " + planet.getY(), true);
+        embed.addField("Difficulty", planet.getToughness(), true);
+
+        if (loots == null || loots.isEmpty()) {
+            embed.addField("Loots", "No loot available on this planet.", false);
+        } else {
+            for (Loot loot : loots) {
+                String itemName = loot.getItem().getName();
+                String amount = loot.getAmount();
+                embed.addField(itemName, "Amount: " + amount, false);
+            }
+        }
+
+        embed.setDescription("All the loots get multiplied by the difficulty of the planet!");
+        embed.setFooter("Surv Planet");
+
+        event.getChannel().sendMessageEmbeds(embed.build()).queue();
+
     }
 }

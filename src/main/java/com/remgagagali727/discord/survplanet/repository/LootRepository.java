@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface LootRepository extends JpaRepository<Loot, Loot.LootId> {
     List<Loot> findByPlanetAndType(Planet planet, Type type);
+
+    List<Loot> findByPlanet(Planet planet);
 }

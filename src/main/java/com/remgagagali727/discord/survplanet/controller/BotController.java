@@ -71,6 +71,10 @@ public class BotController {
                 return;
             case "sell":
                 playerController.sell("", event);
+                return;
+            case "planet":
+                planetController.planetInfo(command.substring(7), event);
+                return;
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("plan ")) planetController.addPlanet(command.substring(5), event);
@@ -98,6 +102,7 @@ public class BotController {
         if(command.startsWith("craft ")) playerController.craft(command.substring(6), event);
         if(command.startsWith("crafts ")) universeController.crafts(command.substring(7), event);
         if(command.startsWith("sell ")) playerController.sell(command.substring(5), event);
+        if(command.startsWith("planet ")) planetController.planetInfo(command.substring(7), event);
     }
 
     private void help(MessageReceivedEvent event) {
@@ -127,6 +132,7 @@ public class BotController {
 
                 🔹 **General Info**
                 `items (page)` → Browse all available items
+                `crafts (page)` → View the list of available crafting recipes
                 `help` → Show this help menu
 
                 ℹ️ Do not include parentheses when using commands. Example: `s!mine`, `s!go earth`, or `s!sell fish 5`

@@ -160,7 +160,7 @@ public class PlayerController {
             embedBuilder.setColor(Color.PINK);
             embedBuilder.setDescription(sb.toString());
         }
-        embedBuilder.setFooter("Survival Universal Bot");
+        embedBuilder.setFooter("Surv Planet");
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
         playerRepository.save(player);
     }
@@ -170,7 +170,7 @@ public class PlayerController {
 
         embedBuilder.setTitle("Oh no!!!")
                 .setDescription("This is an invalid item, try using the ID or the Name of the item")
-                .setFooter("Survival Universe Bot")
+                .setFooter("Surv Planet")
                 .setColor(Color.RED);
 
         event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
@@ -235,7 +235,7 @@ public class PlayerController {
 
         Player player = getPlayer(userId);
 
-        Optional<Item> oitem = itemRepository.findByName(command);
+        Optional<Item> oitem = itemRepository.findByNameIgnoreCase(command);
         if(oitem.isEmpty()) {
             event.getChannel().sendMessage("The item does not exist").queue();
             return;
@@ -294,7 +294,7 @@ public class PlayerController {
                 .setColor(Color.BLUE)
                 .setTitle("Oh no you can't craft this you will need")
                 .addField("Coins :coin:", player.getCoins() + "\\" + item.getCrafting_price(), true)
-                .setFooter("Space Survival Bot", null);
+                .setFooter("Surv Planet", null);
 
         for(Crafting crafting : craftings) {
             embedBuilder.addField(crafting.getRequired().getName(), has(crafting.getRequired(), player) + "\\" + crafting.getAmount(), true);

@@ -56,10 +56,12 @@ public class PlanetController{
             long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
             String tiempo = "<t:" + timeStamp + ":R>";
 
-            message.addField("Cooldown", "you can't mine " + tiempo + " try later :p", false);
+            message.addField("Cooldown", "you can mine " + tiempo + " — try later :p", false);
         } else {
             Planet planet = player.getPlanet();
-            BigInteger extraMinutes = new BigInteger(planet.getToughness()).divide(new BigInteger(player.getDrill().getToughness()));
+            BigInteger extraMinutes = new BigInteger(planet.getToughness())
+                    .divide(new BigInteger(player.getDrill().getToughness()))
+                    .max(new BigInteger("1"));
             int got = (int)(Math.random() * 3 + 1);
             BigInteger bgot = new BigInteger(String.valueOf(got));
             if(extraMinutes.compareTo(new BigInteger("120")) > 0) {
@@ -129,11 +131,12 @@ public class PlanetController{
             long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
             String tiempo = "<t:" + timeStamp + ":R>";
 
-            message.addField("Cooldown", "You can't fish " + tiempo + " — try later :p", false);
+            message.addField("Cooldown", "You can fish " + tiempo + " — try later :p", false);
         } else {
             Planet planet = player.getPlanet();
             BigInteger extraMinutes = new BigInteger(planet.getToughness())
-                    .divide(new BigInteger(player.getRod().getToughness()));
+                    .divide(new BigInteger(player.getRod().getToughness()))
+                    .max(new BigInteger("1"));
             int got = (int) (Math.random() * 3 + 1);
             BigInteger bgot = BigInteger.valueOf(got);
 
@@ -200,11 +203,12 @@ public class PlanetController{
             long timeStamp = localDateTime.atZone(ZoneId.of("America/Mexico_City")).toEpochSecond();
             String tiempo = "<t:" + timeStamp + ":R>";
 
-            message.addField("Cooldown", "You can't hunt " + tiempo + " — try later :p", false);
+            message.addField("Cooldown", "You can hunt " + tiempo + " — try later :p", false);
         } else {
             Planet planet = player.getPlanet();
             BigInteger extraMinutes = new BigInteger(planet.getToughness())
-                    .divide(new BigInteger(player.getWeapon().getToughness()));
+                    .divide(new BigInteger(player.getWeapon().getToughness()))
+                    .max(new BigInteger("1"));
             int got = (int) (Math.random() * 3 + 1);
             BigInteger bgot = BigInteger.valueOf(got);
 

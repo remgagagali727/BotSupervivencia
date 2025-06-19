@@ -146,7 +146,7 @@ public class UniverseController{
         Optional<Planet> optionalPlanet = planetRepository.findById(id);
         Planet planet;
         if(optionalPlanet.isEmpty()) {
-            optionalPlanet = planetRepository.findByName(command);
+            optionalPlanet = planetRepository.findByNameIgnoreCase(command);
             if(optionalPlanet.isEmpty()) {
                 invalidPlanet(event);
                 return;

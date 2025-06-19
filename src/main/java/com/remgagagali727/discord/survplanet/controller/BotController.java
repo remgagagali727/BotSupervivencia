@@ -77,6 +77,7 @@ public class BotController {
                 return;
             case "item":
                 itemController.itemInfo("", event);
+                return;
         }
         if(event.getChannel().getId().equals("1383991269654794341")) {
             if(command.startsWith("plan ")) planetController.addPlanet(command.substring(5), event);

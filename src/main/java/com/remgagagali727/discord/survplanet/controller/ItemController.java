@@ -14,6 +14,7 @@ import java.awt.*;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -397,6 +398,7 @@ public class ItemController {
 
         if (loots != null && !loots.isEmpty()) {
             sb.append("\n🗺️ **Looted From:**\n");
+            loots.sort(Comparator.comparing(o -> new BigInteger(o.getPlanet().getToughness())));
             for (Loot loot : loots) {
                 Planet planet = loot.getPlanet();
                 sb.append("- 🪐 ").append(planet.getName())

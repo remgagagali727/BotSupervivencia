@@ -13,4 +13,6 @@ public interface PlanetRepository extends JpaRepository<Planet, Long> {
 
     @Query(value = "SELECT * FROM planet ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
     Optional<Planet> findRandomPlanet();
+
+    Optional<Planet> findByNameIgnoreCase(String name);
 }
